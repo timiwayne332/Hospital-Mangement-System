@@ -1,0 +1,73 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Appointment Details - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-calendar-alt"></i> Appointment Details</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Appointment Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Patient</label>
+                        <p><strong>{{ appointment.patient.user.get_full_name() }}</strong></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Doctor</label>
+                        <p><strong>Dr. {{ appointment.doctor.user.get_full_name() }}</strong></p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Date & Time</label>
+                        <p><strong>{{ appointment.appointment_date.strftime('%Y-%m-%d %H:%M') }}</strong></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Status</label>
+                        <p>
+                            {% if appointment.status == 'scheduled' %}
+                                <span class="badge badge-warning">Scheduled</span>
+                            {% elif appointment.status == 'completed' %}
+                                <span class="badge badge-success">Completed</span>
+                            {% else %}
+                                <span class="badge badge-danger">Cancelled</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-muted">Reason</label>
+                    <p>{{ appointment.reason or 'General Checkup' }}</p>
+                </div>
+                
+                {% if appointment.notes %}
+                <div class="mb-3">
+                    <label class="form-label text-muted">Notes</label>
+                    <p>{{ appointment.notes }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Patient Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Patient ID:</strong> {{ appointment.patient.patient_id }}</p>
+                <p><strong>Phone:</strong> {{ appointment.patient.user.phone or '-' }}</p>
+                <p><strong>Blood Group:</strong> {{ appointment.patient.blood_group or '-' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

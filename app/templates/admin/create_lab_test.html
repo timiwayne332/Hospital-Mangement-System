@@ -1,0 +1,64 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Create Lab Test - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-flask-vial"></i> Create Lab Test</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="test_code" class="form-label">Test Code *</label>
+                            <input type="text" class="form-control" id="test_code" name="test_code" required placeholder="e.g., BT001">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="test_name" class="form-label">Test Name *</label>
+                            <input type="text" class="form-control" id="test_name" name="test_name" required placeholder="e.g., Blood Count">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="normal_range" class="form-label">Normal Range</label>
+                            <input type="text" class="form-control" id="normal_range" name="normal_range" placeholder="e.g., 4.5-11.0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="unit" class="form-label">Unit</label>
+                            <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g., K/uL">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="price" class="form-label">Price ($) *</label>
+                            <input type="number" class="form-control" id="price" name="price" step="0.01" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="turnaround_time" class="form-label">Turnaround Time</label>
+                            <input type="text" class="form-control" id="turnaround_time" name="turnaround_time" placeholder="e.g., 2-3 days">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Test
+                        </button>
+                        <a href="{{ url_for('admin.lab_tests_list') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

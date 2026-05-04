@@ -1,0 +1,75 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Create Bill - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-receipt"></i> Create New Bill</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="patient_id" class="form-label">Patient *</label>
+                        <select class="form-select" id="patient_id" name="patient_id" required>
+                            <option value="">Select Patient</option>
+                            {% for patient in patients %}
+                            <option value="{{ patient.id }}">{{ patient.user.get_full_name() }} ({{ patient.patient_id }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description *</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="e.g., Consultation Fee, Lab Tests, etc." required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="amount" class="form-label">Amount *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="tax" class="form-label">Tax (Optional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="tax" name="tax" step="0.01" min="0" value="0">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Bill
+                        </button>
+                        <a href="{{ url_for('receptionist.billing') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-light">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Instructions</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Select patient</li>
+                    <li><i class="fas fa-check text-success"></i> Add description</li>
+                    <li><i class="fas fa-check text-success"></i> Enter amount</li>
+                    <li><i class="fas fa-check text-success"></i> Add tax if applicable</li>
+                    <li><i class="fas fa-check text-success"></i> Click Create Bill</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

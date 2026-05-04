@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Lab Staff Dashboard - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card stat-card primary">
+            <h5>Total Lab Results</h5>
+            <div class="stat-value">{{ total_results }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card success">
+            <h5>Pending Entries</h5>
+            <div class="stat-value">{{ pending_results }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card warning">
+            <h5>Recent Results</h5>
+            <div class="stat-value">{{ recent_results|length }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h4 class="mb-0"><i class="fas fa-flask"></i> Latest Lab Results</h4>
+    </div>
+    <div class="card-body">
+        {% if recent_results %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Patient</th>
+                            <th>Test</th>
+                            <th>Status</th>
+                            <th>Result Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in recent_results %}
+                            <tr>
+                                <td>{{ result.id }}</td>
+                                <td>{{ result.patient.user.get_full_name() or result.patient.user.username }}</td>
+                                <td>{{ result.lab_test.test_name }}</td>
+                                <td>{{ result.status or 'Pending' }}</td>
+                                <td>{{ result.result_date.strftime('%Y-%m-%d') if result.result_date else 'N/A' }}</td>
+                                <td>
+                                    <a href="{{ url_for('labstaff.view_lab_result', result_id=result.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="mb-0">No recent lab results found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

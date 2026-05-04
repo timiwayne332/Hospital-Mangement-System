@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Add Medical Record - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-file-medical"></i> Add Medical Record</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h5 class="mb-0">{{ appointment.patient.user.get_full_name() }}</h5>
+                    <small class="text-muted">Appointment: {{ appointment.appointment_date.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="diagnosis" class="form-label">Diagnosis *</label>
+                        <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3" required placeholder="Enter clinical diagnosis"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="treatment" class="form-label">Treatment Plan</label>
+                        <textarea class="form-control" id="treatment" name="treatment" rows="3" placeholder="Describe recommended treatment"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="prescription" class="form-label">Prescription</label>
+                        <textarea class="form-control" id="prescription" name="prescription" rows="3" placeholder="List medications and dosage"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Clinical Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="2" placeholder="Additional observations or follow-up instructions"></textarea>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Record
+                        </button>
+                        <a href="{{ url_for('doctor.appointments') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-light">
+            <div class="card-header">
+                <h5 class="mb-0">Patient Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Patient ID:</strong> {{ appointment.patient.patient_id }}</p>
+                <p><strong>Age:</strong> {{ patient_age or 'N/A' }}</p>
+                <p><strong>Blood Type:</strong> {{ appointment.patient.blood_group or 'Not Recorded' }}</p>
+                <p><strong>Allergies:</strong> {{ appointment.patient.allergies or 'None Recorded' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

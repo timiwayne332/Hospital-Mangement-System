@@ -1,0 +1,58 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Create Bed - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-bed"></i> Add New Bed</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="bed_number" class="form-label">Bed Number *</label>
+                        <input type="text" class="form-control" id="bed_number" name="bed_number" required placeholder="e.g., BED001">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="room_number" class="form-label">Room Number</label>
+                        <input type="text" class="form-control" id="room_number" name="room_number" placeholder="e.g., Room101">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="ward" class="form-label">Ward *</label>
+                        <select class="form-select" id="ward" name="ward" required>
+                            <option value="">Select Ward</option>
+                            <option value="General Ward">General Ward</option>
+                            <option value="ICU">ICU</option>
+                            <option value="Pediatric Ward">Pediatric Ward</option>
+                            <option value="Critical Care">Critical Care</option>
+                            <option value="Private Room">Private Room</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="bed_type" class="form-label">Bed Type</label>
+                        <select class="form-select" id="bed_type" name="bed_type">
+                            <option value="">Select Type</option>
+                            <option value="Normal">Normal</option>
+                            <option value="ICU">ICU</option>
+                            <option value="Isolation">Isolation</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Bed
+                        </button>
+                        <a href="{{ url_for('admin.beds_list') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

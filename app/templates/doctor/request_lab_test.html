@@ -1,0 +1,49 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Request Lab Test - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-vial"></i> Request Lab Test</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Patient Information -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="alert-heading mb-2"><i class="fas fa-user"></i> Patient Information</h6>
+                        <p class="mb-1"><strong>Name:</strong> {{ patient.user.get_full_name() }}</p>
+                        <p class="mb-0"><strong>MRN:</strong> {{ patient.patient_id }}</p>
+                    </div>
+
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="test_id" class="form-label">Lab Test</label>
+                            <select id="test_id" name="test_id" class="form-select" required>
+                                <option value="">Select a lab test</option>
+                                {% for test in available_tests %}
+                                <option value="{{ test.id }}">{{ test.test_name }} - {{ test.test_code }} ({{ test.price | round(2) }} USD)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes / Instructions</label>
+                            <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="Optional notes for lab staff"></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('doctor.view_patient', patient_id=patient.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Patient
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-paper-plane"></i> Request Lab Test
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

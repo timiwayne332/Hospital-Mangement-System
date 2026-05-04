@@ -1,0 +1,90 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Conversation - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar with contacts -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-users"></i> Contacts</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <h6 class="px-3 py-2 text-muted mb-0">Administrators</h6>
+                        {% for admin in admins %}
+                        <a href="{{ url_for('doctor.conversation', user_id=admin.id) }}" class="list-group-item list-group-item-action {% if admin.id == other_user.id %}active{% endif %}">
+                            <i class="fas fa-user-tie"></i> {{ admin.get_full_name() }}
+                        </a>
+                        {% endfor %}
+                        
+                        <h6 class="px-3 py-2 text-muted mb-0 mt-2">Doctors</h6>
+                        {% for doctor in other_doctors %}
+                        <a href="{{ url_for('doctor.conversation', user_id=doctor.id) }}" class="list-group-item list-group-item-action {% if doctor.id == other_user.id %}active{% endif %}">
+                            <i class="fas fa-stethoscope"></i> {{ doctor.get_full_name() }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main conversation area -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comment-dots"></i> 
+                        Conversation with {{ other_user.get_full_name() }}
+                        <span class="badge bg-light text-dark float-end">{{ other_user.role.value|title }}</span>
+                    </h5>
+                </div>
+                
+                <!-- Messages area -->
+                <div class="card-body" style="height: 500px; overflow-y: auto; background-color: #f8f9fa;">
+                    {% if messages %}
+                        {% for msg in messages %}
+                        <div class="mb-3 {% if msg.sender_id == current_user.id %}text-end{% endif %}">
+                            <div class="d-inline-block p-3 rounded {% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-white border{% endif %}" style="max-width: 70%;">
+                                <p class="mb-1">{{ msg.content }}</p>
+                                <small class="{% if msg.sender_id == current_user.id %}text-white-50{% else %}text-muted{% endif %}">
+                                    {{ msg.created_at.strftime('%d %b %H:%M') }}
+                                </small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-comment-slash"></i> No messages yet. Start the conversation!
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Message input -->
+                <div class="card-footer bg-light">
+                    <form method="POST" action="{{ url_for('doctor.send_message', recipient_id=other_user.id) }}">
+                        <div class="input-group">
+                            <input type="text" name="content" class="form-control" placeholder="Type your message..." required>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Send
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-scroll to bottom
+    document.addEventListener('DOMContentLoaded', function() {
+        const messagesArea = document.querySelector('.card-body[style*="overflow-y"]');
+        if (messagesArea) {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+    });
+</script>
+{% endblock %}

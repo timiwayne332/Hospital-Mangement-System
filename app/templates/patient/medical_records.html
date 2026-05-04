@@ -1,0 +1,86 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Medical Records - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-file-medical"></i> Medical Records</h2>
+
+<div class="card">
+    <div class="card-body">
+        {% if records.items %}
+        <div class="accordion" id="medicalRecordsAccordion">
+            {% for record in records.items %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ record.id }}">
+                    <button class="accordion-button {% if loop.first %}{% else %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ record.id }}">
+                        <strong>{{ record.visit_date.strftime('%Y-%m-%d') }}</strong> - Dr. {{ record.doctor.user.get_full_name() }}
+                    </button>
+                </h2>
+                <div id="collapse{{ record.id }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#medicalRecordsAccordion">
+                    <div class="accordion-body">
+                        <div class="mb-3">
+                            <label class="fw-bold">Diagnosis</label>
+                            <p>{{ record.diagnosis }}</p>
+                        </div>
+                        {% if record.treatment %}
+                        <div class="mb-3">
+                            <label class="fw-bold">Treatment</label>
+                            <p>{{ record.treatment }}</p>
+                        </div>
+                        {% endif %}
+                        {% if record.prescription %}
+                        <div class="mb-3">
+                            <label class="fw-bold">Prescription</label>
+                            <p>{{ record.prescription }}</p>
+                        </div>
+                        {% endif %}
+                        {% if record.notes %}
+                        <div class="mb-3">
+                            <label class="fw-bold">Notes</label>
+                            <p>{{ record.notes }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if records.pages > 1 %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if records.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('patient.medical_records', page=records.prev_num) }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for page_num in records.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num == records.page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('patient.medical_records', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if records.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('patient.medical_records', page=records.next_num) }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <p class="text-muted text-center my-3">No medical records available.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

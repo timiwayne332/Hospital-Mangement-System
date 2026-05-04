@@ -1,0 +1,128 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Bill Details - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('patient.billing') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Billing
+    </a>
+</div>
+
+<!-- Bill Information -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="mb-0"><i class="fas fa-receipt"></i> Bill Details</h3>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td><strong>Bill Number:</strong></td>
+                            <td>{{ bill.bill_number }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Date:</strong></td>
+                            <td>{{ bill.created_at.strftime('%B %d, %Y') if bill.created_at else '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Status:</strong></td>
+                            <td>
+                                {% if bill.payment_status == 'paid' %}
+                                    <span class="badge bg-success">Paid</span>
+                                {% elif bill.payment_status == 'pending' %}
+                                    <span class="badge bg-warning">Pending</span>
+                                {% elif bill.payment_status == 'partial' %}
+                                    <span class="badge bg-info">Partial Payment</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ bill.payment_status }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td><strong>Payment Method:</strong></td>
+                            <td>{{ bill.payment_method or 'Not Yet Paid' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Description:</strong></td>
+                            <td>{{ bill.description }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- Amount Summary -->
+        <div class="row mt-4">
+            <div class="col-md-6 ms-auto">
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td><strong>Subtotal:</strong></td>
+                            <td>${{ "%.2f"|format(bill.amount) }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tax:</strong></td>
+                            <td>${{ "%.2f"|format(bill.tax) }}</td>
+                        </tr>
+                        <tr class="table-active" style="font-size: 1.2rem;">
+                            <td><strong>Total Amount:</strong></td>
+                            <td><strong>${{ "%.2f"|format(bill.total_amount) }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- Payment Information -->
+        {% if bill.payment_status != 'pending' %}
+        <div class="alert alert-info mt-4">
+            <h5><i class="fas fa-info-circle"></i> Payment Information</h5>
+            <p><strong>Method:</strong> {{ bill.payment_method }}</p>
+            {% if bill.payment_date %}
+            <p><strong>Payment Date:</strong> {{ bill.payment_date.strftime('%B %d, %Y') }}</p>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="alert alert-warning mt-4">
+            <h5><i class="fas fa-warning"></i> Payment Pending</h5>
+            <p>This bill is awaiting payment. Please contact the hospital's accounting department or visit our office to make a payment.</p>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="mt-4">
+            <button onclick="window.print()" class="btn btn-secondary">
+                <i class="fas fa-print"></i> Print Bill
+            </button>
+            {% if bill.payment_status != 'paid' %}
+            <a href="{{ url_for('patient.billing') }}" class="btn btn-primary">
+                <i class="fas fa-credit-card"></i> Make Payment
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Notes -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-sticky-note"></i> Additional Notes</h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">For any questions regarding this bill, please contact the accounting department at the hospital during business hours.</p>
+    </div>
+</div>
+{% endblock %}

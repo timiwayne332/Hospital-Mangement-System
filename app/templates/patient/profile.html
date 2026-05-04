@@ -1,0 +1,126 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Patient Profile - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-user-circle"></i> My Profile</h2>
+    <a href="{{ url_for('patient.edit_profile') }}" class="btn btn-primary">
+        <i class="fas fa-edit"></i> Edit Profile
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user"></i> Personal Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label text-muted">Name</label>
+                    <p>{{ current_user.get_full_name() }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted">Email</label>
+                    <p>{{ current_user.email }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted">Phone</label>
+                    <p>{{ current_user.phone or 'Not Provided' }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted">Patient ID</label>
+                    <p><strong>{{ patient.patient_id }}</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-heartbeat"></i> Health Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label text-muted">Blood Group</label>
+                    <p>{{ patient.blood_group or 'Not Provided' }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted">Gender</label>
+                    <p>{{ patient.gender or 'Not Provided' }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted">Date of Birth</label>
+                    <p>{{ patient.date_of_birth.strftime('%Y-%m-%d') if patient.date_of_birth else 'Not Provided' }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted">Address</label>
+                    <p>{{ patient.address or 'Not Provided' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-exclamation-circle"></i> Emergency Contact</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label text-muted">Contact Name</label>
+                    <p>{{ patient.emergency_contact or 'Not Provided' }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted">Phone</label>
+                    <p>{{ patient.emergency_contact_phone or 'Not Provided' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Insurance Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label text-muted">Insurance Provider</label>
+                    <p>{{ patient.insurance_provider or 'Not Provided' }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted">Insurance Number</label>
+                    <p>{{ patient.insurance_number or 'Not Provided' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-file-medical"></i> Medical History</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ patient.medical_history or 'No history recorded' }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-allergies"></i> Allergies</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ patient.allergies or 'No allergies recorded' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

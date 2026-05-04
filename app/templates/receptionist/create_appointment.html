@@ -1,0 +1,73 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Create Appointment - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-calendar-plus"></i> Schedule New Appointment</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="patient_id" class="form-label">Patient *</label>
+                        <select class="form-select" id="patient_id" name="patient_id" required>
+                            <option value="">Select Patient</option>
+                            {% for patient in patients %}
+                            <option value="{{ patient.id }}">{{ patient.user.get_full_name() }} ({{ patient.patient_id }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="doctor_id" class="form-label">Doctor *</label>
+                        <select class="form-select" id="doctor_id" name="doctor_id" required>
+                            <option value="">Select Doctor</option>
+                            {% for doctor in doctors %}
+                            <option value="{{ doctor.id }}">Dr. {{ doctor.user.get_full_name() }} - {{ doctor.specialization }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="appointment_date" class="form-label">Date & Time *</label>
+                        <input type="datetime-local" class="form-control" id="appointment_date" name="appointment_date" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Reason for Visit</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="e.g., Regular Checkup, Follow-up Visit, etc."></textarea>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Schedule Appointment
+                        </button>
+                        <a href="{{ url_for('receptionist.appointments') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-light">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Tips</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Select patient from the list</li>
+                    <li><i class="fas fa-check text-success"></i> Choose available doctor</li>
+                    <li><i class="fas fa-check text-success"></i> Set appointment date/time</li>
+                    <li><i class="fas fa-check text-success"></i> Add reason if needed</li>
+                    <li><i class="fas fa-check text-success"></i> Click Schedule</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

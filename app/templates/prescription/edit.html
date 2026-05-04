@@ -1,0 +1,167 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Edit Prescription - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit"></i> Edit Prescription #{{ prescription.id }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    
+                    <form method="POST">
+                        <!-- Patient Info (Read-only) -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><strong>Patient:</strong></label>
+                                <input type="text" class="form-control" 
+                                       value="{{ prescription.patient.user.get_full_name() }}" disabled>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><strong>MRN:</strong></label>
+                                <input type="text" class="form-control" 
+                                       value="{{ prescription.patient.patient_id }}" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Prescribed Duration -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><strong>Prescribed Duration:</strong></label>
+                                <input type="text" name="prescribed_duration" class="form-control" 
+                                       value="{{ prescription.prescribed_duration }}" required>
+                            </div>
+                        </div>
+
+                        <!-- Special Instructions -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label"><strong>Special Instructions:</strong></label>
+                                <textarea name="instructions" class="form-control" rows="3">{{ prescription.instructions or '' }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Medicines Section -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label"><strong>Prescribed Medicines:</strong></label>
+                                <button type="button" class="btn btn-sm btn-success float-end" onclick="addMedicineRow()">
+                                    <i class="fas fa-plus"></i> Add Medicine
+                                </button>
+                                <table class="table table-bordered" id="medicinesTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Medicine Name</th>
+                                            <th>Dosage</th>
+                                            <th>Frequency</th>
+                                            <th>Route</th>
+                                            <th>Quantity</th>
+                                            <th>Unit</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="medicinesBody">
+                                        {% for item in prescription.prescription_items %}
+                                        <tr>
+                                            <td>
+                                                <select name="medicine_id" class="form-control form-control-sm" required>
+                                                    <option value="">Select Medicine</option>
+                                                    {% for medicine in medicines %}
+                                                    <option value="{{ medicine.id }}" {% if medicine.id == item.medicine_id %}selected{% endif %}>
+                                                        {{ medicine.name }} ({{ medicine.generic_name }})
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
+                                            <td><input type="text" name="dosage" class="form-control form-control-sm" value="{{ item.dosage or '' }}" placeholder="500mg"></td>
+                                            <td><input type="text" name="frequency" class="form-control form-control-sm" value="{{ item.frequency }}" required></td>
+                                            <td>
+                                                <select name="route" class="form-control form-control-sm">
+                                                    <option value="oral" {% if item.route == 'oral' %}selected{% endif %}>Oral</option>
+                                                    <option value="injection" {% if item.route == 'injection' %}selected{% endif %}>Injection</option>
+                                                    <option value="topical" {% if item.route == 'topical' %}selected{% endif %}>Topical</option>
+                                                    <option value="inhalation" {% if item.route == 'inhalation' %}selected{% endif %}>Inhalation</option>
+                                                </select>
+                                            </td>
+                                            <td><input type="number" name="quantity" class="form-control form-control-sm" value="{{ item.quantity }}" min="1" required></td>
+                                            <td>
+                                                <select name="unit" class="form-control form-control-sm">
+                                                    <option value="tablet" {% if item.unit == 'tablet' %}selected{% endif %}>Tablet</option>
+                                                    <option value="capsule" {% if item.unit == 'capsule' %}selected{% endif %}>Capsule</option>
+                                                    <option value="ml" {% if item.unit == 'ml' %}selected{% endif %}>ML</option>
+                                                    <option value="injection" {% if item.unit == 'injection' %}selected{% endif %}>Injection</option>
+                                                </select>
+                                            </td>
+                                            <td><button type="button" class="btn btn-sm btn-danger" onclick="removeMedicineRow(this)"><i class="fas fa-trash"></i></button></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-save"></i> Update Prescription
+                                </button>
+                                <a href="{{ url_for('prescription.view_prescription', prescription_id=prescription.id) }}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function addMedicineRow() {
+    const tbody = document.getElementById('medicinesBody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td>
+            <select name="medicine_id" class="form-control form-control-sm" required>
+                <option value="">Select Medicine</option>
+                {% for medicine in medicines %}
+                <option value="{{ medicine.id }}">{{ medicine.name }} ({{ medicine.generic_name }})</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td><input type="text" name="dosage" class="form-control form-control-sm" placeholder="500mg"></td>
+        <td><input type="text" name="frequency" class="form-control form-control-sm" placeholder="2 times daily" required></td>
+        <td>
+            <select name="route" class="form-control form-control-sm">
+                <option value="oral">Oral</option>
+                <option value="injection">Injection</option>
+                <option value="topical">Topical</option>
+                <option value="inhalation">Inhalation</option>
+            </select>
+        </td>
+        <td><input type="number" name="quantity" class="form-control form-control-sm" value="1" min="1" required></td>
+        <td>
+            <select name="unit" class="form-control form-control-sm">
+                <option value="tablet">Tablet</option>
+                <option value="capsule">Capsule</option>
+                <option value="ml">ML</option>
+                <option value="injection">Injection</option>
+            </select>
+        </td>
+        <td><button type="button" class="btn btn-sm btn-danger" onclick="removeMedicineRow(this)"><i class="fas fa-trash"></i></button></td>
+    `;
+    tbody.appendChild(newRow);
+}
+
+function removeMedicineRow(btn) {
+    btn.closest('tr').remove();
+}
+</script>
+{% endblock %}

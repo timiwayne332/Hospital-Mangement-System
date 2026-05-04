@@ -1,0 +1,130 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Appointment Details - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('doctor.appointments') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Appointments
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="mb-0"><i class="fas fa-calendar-alt"></i> Appointment Details</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="mb-3">Appointment Information</h5>
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td><strong>Date:</strong></td>
+                            <td>{{ appointment.appointment_date.strftime('%B %d, %Y') }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Time:</strong></td>
+                            <td>{{ appointment.appointment_date.strftime('%I:%M %p') }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Status:</strong></td>
+                            <td>
+                                {% if appointment.status == 'scheduled' %}
+                                    <span class="badge bg-warning">Scheduled</span>
+                                {% elif appointment.status == 'completed' %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Reason:</strong></td>
+                            <td>{{ appointment.reason }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Notes:</strong></td>
+                            <td>{{ appointment.notes or '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="col-md-6">
+                <h5 class="mb-3">Patient Information</h5>
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td><strong>Name:</strong></td>
+                            <td>{{ appointment.patient.user.get_full_name() }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Email:</strong></td>
+                            <td>{{ appointment.patient.user.email }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phone:</strong></td>
+                            <td>{{ appointment.patient.user.phone }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DOB:</strong></td>
+                            <td>{{ appointment.patient.date_of_birth.strftime('%B %d, %Y') if appointment.patient.date_of_birth else '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Blood Group:</strong></td>
+                            <td>{{ appointment.patient.blood_group or '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Allergies:</strong></td>
+                            <td>{{ appointment.patient.allergies or 'None' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if appointment.status == 'scheduled' %}
+        <div class="mt-4">
+            <form action="{{ url_for('doctor.complete_appointment', appointment_id=appointment.id) }}" method="POST">
+                <button type="submit" class="btn btn-success" onclick="return confirm('Mark this appointment as completed?')">
+                    <i class="fas fa-check"></i> Complete Appointment
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Medical Records Section -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-file-medical"></i> Medical Records for This Appointment</h5>
+    </div>
+    <div class="card-body">
+        {% if medical_records %}
+            <div class="accordion" id="recordsAccordion">
+                {% for record in medical_records %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button {% if loop.index != 1 %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#record{{ record.id }}">
+                            Record from {{ record.visit_date.strftime('%B %d, %Y') }}
+                        </button>
+                    </h2>
+                    <div id="record{{ record.id }}" class="accordion-collapse collapse {% if loop.index == 1 %}show{% endif %}" data-bs-parent="#recordsAccordion">
+                        <div class="accordion-body">
+                            <p><strong>Diagnosis:</strong> {{ record.diagnosis }}</p>
+                            <p><strong>Treatment:</strong> {{ record.treatment }}</p>
+                            <p><strong>Prescription:</strong> {{ record.prescription }}</p>
+                            <p><strong>Visit Notes:</strong> {{ record.visit_notes }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">No medical records found for this appointment.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

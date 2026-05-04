@@ -1,0 +1,80 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Audit Logs - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-history"></i> Audit Logs</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="entity_type" class="form-label">Entity Type</label>
+                <input type="text" class="form-control" id="entity_type" name="entity_type" value="{{ entity_type }}" placeholder="Appointment, User, Department">
+            </div>
+            <div class="col-md-4">
+                <label for="user_id" class="form-label">User ID</label>
+                <input type="number" class="form-control" id="user_id" name="user_id" value="{{ user_id or '' }}" placeholder="User ID">
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter"></i> Filter Logs
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if logs.items %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Entity</th>
+                        <th>Entity ID</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs.items %}
+                    <tr>
+                        <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ log.user.username if log.user else 'System' }}</td>
+                        <td>{{ log.action }}</td>
+                        <td>{{ log.entity_type }}</td>
+                        <td>{{ log.entity_id or '-' }}</td>
+                        <td>{{ log.details or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if logs.pages > 1 %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if logs.has_prev %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('admin.audit_logs', page=logs.prev_num, entity_type=entity_type, user_id=user_id) }}">Previous</a></li>
+                {% endif %}
+                {% for page_num in logs.iter_pages() %}
+                    {% if page_num %}
+                        <li class="page-item {% if page_num == logs.page %}active{% endif %}"><a class="page-link" href="{{ url_for('admin.audit_logs', page=page_num, entity_type=entity_type, user_id=user_id) }}">{{ page_num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if logs.has_next %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('admin.audit_logs', page=logs.next_num, entity_type=entity_type, user_id=user_id) }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <p class="text-muted">No audit entries found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Patient Dashboard - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-user-circle"></i> Patient Dashboard</h2>
+
+<!-- Welcome Card -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h5>Welcome back, {{ current_user.get_full_name() }}!</h5>
+        <p class="text-muted">Patient ID: <strong>{{ current_user.patient.patient_id }}</strong></p>
+    </div>
+</div>
+
+<!-- Upcoming Appointments -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Upcoming Appointments ({{ stats.upcoming_appointments|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if stats.upcoming_appointments %}
+                    <div class="list-group">
+                        {% for apt in stats.upcoming_appointments[:5] %}
+                        <a href="{{ url_for('patient.view_appointment', appointment_id=apt.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ apt.doctor.user.get_full_name() }}</h6>
+                                <small>{{ apt.appointment_date.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </div>
+                            <p class="mb-1 text-muted">{{ apt.reason or 'General Checkup' }}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <a href="{{ url_for('patient.appointments') }}" class="btn btn-sm btn-outline-primary mt-3">
+                        <i class="fas fa-list"></i> View All
+                    </a>
+                {% else %}
+                    <p class="text-muted">No upcoming appointments.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Bills -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-receipt"></i> Pending Bills ({{ stats.pending_bills|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if stats.pending_bills %}
+                    <div class="list-group">
+                        {% for bill in stats.pending_bills[:5] %}
+                        <a href="{{ url_for('patient.view_bill', bill_id=bill.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ bill.bill_number }}</h6>
+                                <span class="badge badge-danger">${{ "%.2f"|format(bill.total_amount) }}</span>
+                            </div>
+                            <p class="mb-1 text-muted">{{ bill.description }}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <a href="{{ url_for('patient.billing') }}" class="btn btn-sm btn-outline-primary mt-3">
+                        <i class="fas fa-list"></i> View All
+                    </a>
+                {% else %}
+                    <p class="text-muted">No pending bills.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Medical Information -->
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-file-medical"></i> Medical Records ({{ stats.medical_records|length }})</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Total records: <strong>{{ stats.medical_records|length }}</strong></p>
+                <a href="{{ url_for('patient.medical_records') }}" class="btn btn-sm btn-primary w-100">
+                    <i class="fas fa-eye"></i> View Records
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-flask"></i> Lab Results ({{ stats.lab_results|length }})</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Total results: <strong>{{ stats.lab_results|length }}</strong></p>
+                <a href="{{ url_for('patient.lab_results') }}" class="btn btn-sm btn-primary w-100">
+                    <i class="fas fa-eye"></i> View Results
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user"></i> My Profile</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Blood Type: <strong>{{ current_user.patient.blood_group or 'Not Set' }}</strong></p>
+                <a href="{{ url_for('patient.edit_profile') }}" class="btn btn-sm btn-primary w-100">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

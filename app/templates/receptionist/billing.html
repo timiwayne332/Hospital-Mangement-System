@@ -1,0 +1,119 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Billing - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-receipt"></i> Billing Records</h2>
+    <a href="{{ url_for('receptionist.create_bill') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Create Bill
+    </a>
+</div>
+
+<!-- Filter -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="GET" class="d-flex gap-2">
+            <select name="status" class="form-select form-select-sm">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Paid</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="partial" {% if status_filter == 'partial' %}selected{% endif %}>Partial</option>
+            </select>
+            <button type="submit" class="btn btn-sm btn-outline-primary">Filter</button>
+        </form>
+    </div>
+</div>
+
+<!-- Billing Table -->
+<div class="card">
+    <div class="card-body">
+        {% if bills.items %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Bill #</th>
+                        <th>Patient</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Payment Method</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bill in bills.items %}
+                    <tr>
+                        <td><small>{{ bill.bill_number }}</small></td>
+                        <td>{{ bill.patient.user.get_full_name() }}</td>
+                        <td>{{ bill.bill_date.strftime('%Y-%m-%d') }}</td>
+                        <td>${{ "%.2f"|format(bill.total_amount) }}</td>
+                        <td>
+                            {% if bill.payment_status == 'paid' %}
+                                <span class="badge badge-success">Paid</span>
+                            {% elif bill.payment_status == 'partial' %}
+                                <span class="badge badge-warning">Partial</span>
+                            {% else %}
+                                <span class="badge badge-danger">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ bill.payment_method or '-' }}</td>
+                        <td>
+                            {% if bill.payment_status != 'paid' %}
+                                <form action="{{ url_for('receptionist.record_payment', bill_id=bill.id) }}" method="POST" style="display: inline;">
+                                    <input type="hidden" name="payment_method" value="cash">
+                                    <input type="hidden" name="amount_paid" value="{{ bill.total_amount }}">
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        <i class="fas fa-money-bill"></i> Record Payment
+                                    </button>
+                                </form>
+                            {% endif %}
+                            <a href="{{ url_for('receptionist.generate_receipt', bill_id=bill.id) }}" class="btn btn-sm btn-info">
+                                <i class="fas fa-file-pdf"></i> Receipt
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if bills.pages > 1 %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if bills.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('receptionist.billing', page=bills.prev_num) }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for page_num in bills.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num == bills.page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('receptionist.billing', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if bills.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('receptionist.billing', page=bills.next_num) }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <p class="text-muted text-center my-3">No billing records.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

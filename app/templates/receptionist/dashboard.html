@@ -1,0 +1,212 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Receptionist Dashboard - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-headset"></i> Receptionist Dashboard</h2>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stat-card primary">
+            <h5><i class="fas fa-users"></i> Total Patients</h5>
+            <div class="stat-value">{{ stats.total_patients }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card warning">
+            <h5><i class="fas fa-calendar-alt"></i> All Appointments</h5>
+            <div class="stat-value">{{ stats.total_appointments }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card danger">
+            <h5><i class="fas fa-clock"></i> Pending</h5>
+            <div class="stat-value">{{ stats.pending_appointments }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card danger">
+            <h5><i class="fas fa-receipt"></i> Pending Bills</h5>
+            <div class="stat-value">{{ stats.pending_bills }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Appointments -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Today's Appointments ({{ stats.today_appointments|length }})</h5>
+    </div>
+    <div class="card-body">
+        {% if stats.today_appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apt in stats.today_appointments %}
+                        <tr>
+                            <td>{{ apt.patient.user.get_full_name() }}</td>
+                            <td>{{ apt.doctor.user.get_full_name() }}</td>
+                            <td>{{ apt.appointment_date.strftime('%H:%M') }}</td>
+                            <td>
+                                {% if apt.status == 'scheduled' %}
+                                    <span class="badge badge-warning">Scheduled</span>
+                                {% elif apt.status == 'completed' %}
+                                    <span class="badge badge-success">Completed</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Cancelled</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No appointments scheduled for today.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Payment Notifications -->
+<div class="card mb-4" id="payment-notifications-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-bell"></i> Payment Notifications <span class="badge badge-danger" id="notification-count">0</span></h5>
+        <button class="btn btn-sm btn-outline-primary" onclick="loadNotifications()">
+            <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+    </div>
+    <div class="card-body">
+        <div id="notifications-list">
+            <p class="text-muted">Loading notifications...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div class="card shadow-lg border-3 border-info">
+    <div class="card-header bg-info text-white py-3">
+        <h4 class="mb-0"><i class="fas fa-link"></i> Quick Actions</h4>
+        <small class="text-white-75">One-click shortcuts for the receptionist workflow</small>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-sm-6 col-md-3">
+                <a href="{{ url_for('receptionist.create_appointment') }}" class="btn btn-info btn-lg d-grid gap-2 text-white shadow-sm">
+                    <i class="fas fa-plus fa-2x mb-2"></i>
+                    <span class="fw-bold">New Appointment</span>
+                </a>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <a href="{{ url_for('receptionist.patients') }}" class="btn btn-info btn-lg d-grid gap-2 text-white shadow-sm">
+                    <i class="fas fa-users fa-2x mb-2"></i>
+                    <span class="fw-bold">Patients</span>
+                </a>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <a href="{{ url_for('receptionist.admit_patient') }}" class="btn btn-info btn-lg d-grid gap-2 text-white shadow-sm">
+                    <i class="fas fa-door-open fa-2x mb-2"></i>
+                    <span class="fw-bold">Admit Patient</span>
+                </a>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <a href="{{ url_for('receptionist.request_lab_test') }}" class="btn btn-warning btn-lg d-grid gap-2 text-white shadow-sm">
+                    <i class="fas fa-vial fa-2x mb-2"></i>
+                    <span class="fw-bold">Request Lab Test</span>
+                </a>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <a href="{{ url_for('receptionist.create_bill') }}" class="btn btn-success btn-lg d-grid gap-2 text-white shadow-sm">
+                    <i class="fas fa-receipt fa-2x mb-2"></i>
+                    <span class="fw-bold">Create Bill</span>
+                </a>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <a href="{{ url_for('receptionist.messages') }}" class="btn btn-info btn-lg d-grid gap-2 text-white shadow-sm">
+                    <i class="fas fa-comments fa-2x mb-2"></i>
+                    <span class="fw-bold">Messages</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function loadNotifications() {
+    fetch('{{ url_for("receptionist.get_notifications_api") }}')
+        .then(response => response.json())
+        .then(data => {
+            const list = document.getElementById('notifications-list');
+            const countBadge = document.getElementById('notification-count');
+            
+            countBadge.textContent = data.length;
+            
+            if (data.length === 0) {
+                list.innerHTML = '<p class="text-muted"><i class="fas fa-check-circle text-success"></i> No new payment notifications.</p>';
+                return;
+            }
+            
+            let html = '<ul class="list-group">';
+            data.forEach(notification => {
+                html += `
+                    <li class="list-group-item d-flex justify-content-between align-items-center" id="notif-${notification.id}">
+                        <div>
+                            <i class="fas fa-money-bill-wave text-success mr-2"></i>
+                            <strong>${notification.patient_name}</strong>
+                            <br>
+                            <small class="text-muted">${notification.message}</small>
+                            <br>
+                            <small class="text-info">${notification.created_at}</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-success" onclick="markAsRead(${notification.id})">
+                            <i class="fas fa-check"></i> Mark Read
+                        </button>
+                    </li>
+                `;
+            });
+            html += '</ul>';
+            list.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error loading notifications:', error);
+            document.getElementById('notifications-list').innerHTML = '<p class="text-danger">Error loading notifications.</p>';
+        });
+}
+
+function markAsRead(notificationId) {
+    fetch(`{{ url_for("receptionist.mark_notification_read_api") }}`.replace('api/notifications/', `api/notifications/${notificationId}/read`), {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const element = document.getElementById(`notif-${notificationId}`);
+            element.classList.add('bg-light');
+            element.querySelector('button').disabled = true;
+            element.querySelector('button').innerHTML = '<i class="fas fa-check"></i> Read';
+            
+            // Update count
+            const countBadge = document.getElementById('notification-count');
+            countBadge.textContent = Math.max(0, parseInt(countBadge.textContent) - 1);
+        }
+    })
+    .catch(error => console.error('Error marking notification as read:', error));
+}
+
+// Load notifications on page load
+document.addEventListener('DOMContentLoaded', loadNotifications);
+
+// Auto-refresh every 30 seconds
+setInterval(loadNotifications, 30000);
+</script>
+{% endblock %}

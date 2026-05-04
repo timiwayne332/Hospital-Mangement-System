@@ -1,0 +1,112 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Doctor Dashboard - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-stethoscope"></i> Doctor Dashboard</h2>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="stat-card primary">
+            <h5><i class="fas fa-users"></i> Total Patients</h5>
+            <div class="stat-value">{{ stats.total_patients }}</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card warning">
+            <h5><i class="fas fa-clock"></i> Pending Appointments</h5>
+            <div class="stat-value">{{ stats.pending_appointments }}</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card success">
+            <h5><i class="fas fa-check-circle"></i> Completed</h5>
+            <div class="stat-value">{{ stats.completed_appointments }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Appointments -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Today's Appointments</h5>
+    </div>
+    <div class="card-body">
+        {% if stats.today_appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Time</th>
+                            <th>Reason</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apt in stats.today_appointments %}
+                        <tr>
+                            <td>{{ apt.patient.user.get_full_name() }}</td>
+                            <td>{{ apt.appointment_date.strftime('%H:%M') }}</td>
+                            <td>{{ apt.reason or 'General Checkup' }}</td>
+                            <td>
+                                <a href="{{ url_for('doctor.view_appointment', appointment_id=apt.id) }}" class="btn btn-sm btn-info me-1">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <a href="{{ url_for('doctor.request_lab_test', patient_id=apt.patient.id) }}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-vials"></i> Lab Test
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No appointments scheduled for today.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-link"></i> Quick Access</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-sm-6 col-md-3">
+                        <a href="{{ url_for('doctor.messages') }}" class="btn btn-info btn-lg d-grid gap-2 text-white shadow-sm">
+                            <i class="fas fa-comments fa-2x mb-2"></i>
+                            <span class="fw-bold">Messages</span>
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <a href="{{ url_for('doctor.appointments') }}" class="btn btn-primary btn-lg d-grid gap-2">
+                            <i class="fas fa-calendar-alt fa-2x mb-2"></i> Appointments
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <a href="{{ url_for('doctor.patients') }}" class="btn btn-primary btn-lg d-grid gap-2">
+                            <i class="fas fa-users fa-2x mb-2"></i> Patients
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <a href="{{ url_for('doctor.request_lab_test', patient_id=stats.today_appointments[0].patient.id) if stats.today_appointments else url_for('doctor.patients') }}" class="btn btn-warning btn-lg d-grid gap-2 text-white">
+                            <i class="fas fa-vials fa-2x mb-2"></i> Lab Tests
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <a href="{{ url_for('doctor.medical_records') }}" class="btn btn-primary btn-lg d-grid gap-2">
+                            <i class="fas fa-file-medical fa-2x mb-2"></i> Records
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

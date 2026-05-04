@@ -1,0 +1,56 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Create Department - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-sitemap"></i> Add Department</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Department Name *</label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="e.g., Cardiology">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Department Code *</label>
+                        <input type="text" class="form-control" id="code" name="code" required placeholder="e.g., CARD">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="head_of_department" class="form-label">Head of Department</label>
+                        <input type="text" class="form-control" id="head_of_department" name="head_of_department" placeholder="e.g., Dr. Jane Doe">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="location" name="location" placeholder="e.g., Building A, Floor 2">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="phone" name="phone" placeholder="e.g., +1 555 123 4567">
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Department
+                        </button>
+                        <a href="{{ url_for('admin.departments_list') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

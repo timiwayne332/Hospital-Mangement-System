@@ -1,0 +1,125 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Doctor Appointments - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-calendar-alt"></i> My Appointments</h2>
+</div>
+
+<!-- Filter -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="GET" class="d-flex gap-2">
+            <select name="status" class="form-select form-select-sm">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                <option value="scheduled" {% if status_filter == 'scheduled' %}selected{% endif %}>Scheduled</option>
+                <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+                <option value="rescheduled" {% if status_filter == 'rescheduled' %}selected{% endif %}>Rescheduled</option>
+                <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                <option value="no_show" {% if status_filter == 'no_show' %}selected{% endif %}>No Show</option>
+            </select>
+            <button type="submit" class="btn btn-sm btn-outline-primary">Filter</button>
+        </form>
+    </div>
+</div>
+
+<!-- Appointments Table -->
+<div class="card">
+    <div class="card-body">
+        {% if appointments.items %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Date & Time</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for apt in appointments.items %}
+                    <tr>
+                        <td>{{ apt.patient.user.get_full_name() }}</td>
+                        <td>{{ apt.appointment_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ apt.reason or 'General Checkup' }}</td>
+                        <td>
+                            {% if apt.status == 'scheduled' %}
+                                <span class="badge badge-warning">Scheduled</span>
+                            {% elif apt.status == 'confirmed' %}
+                                <span class="badge badge-info">Confirmed</span>
+                            {% elif apt.status == 'in_progress' %}
+                                <span class="badge badge-primary">In Progress</span>
+                            {% elif apt.status == 'rescheduled' %}
+                                <span class="badge badge-secondary">Rescheduled</span>
+                            {% elif apt.status == 'completed' %}
+                                <span class="badge badge-success">Completed</span>
+                            {% elif apt.status == 'no_show' %}
+                                <span class="badge badge-dark">No Show</span>
+                            {% else %}
+                                <span class="badge badge-danger">Cancelled</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('doctor.view_appointment', appointment_id=apt.id) }}" class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if apt.status == 'scheduled' %}
+                            <a href="{{ url_for('doctor.add_medical_record', appointment_id=apt.id) }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-plus"></i> Add Record
+                            </a>
+                            <form action="{{ url_for('doctor.complete_appointment', appointment_id=apt.id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if appointments.pages > 1 %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if appointments.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('doctor.appointments', page=appointments.prev_num) }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for page_num in appointments.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num == appointments.page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('doctor.appointments', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if appointments.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('doctor.appointments', page=appointments.next_num) }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <p class="text-muted text-center my-3">No appointments scheduled.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

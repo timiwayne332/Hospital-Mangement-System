@@ -1,0 +1,56 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Admit Patient - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-door-open"></i> Admit Patient</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="patient_id" class="form-label">Patient *</label>
+                        <select class="form-select" id="patient_id" name="patient_id" required>
+                            <option value="">Select Patient</option>
+                            {% for patient in patients %}
+                            <option value="{{ patient.id }}">{{ patient.user.get_full_name() }} ({{ patient.patient_id }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="bed_id" class="form-label">Bed *</label>
+                        <select class="form-select" id="bed_id" name="bed_id" required>
+                            <option value="">Select Bed</option>
+                            {% for bed in available_beds %}
+                            <option value="{{ bed.id }}">{{ bed.bed_number }} - {{ bed.ward }} ({{ bed.room_number }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Reason for Admission *</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="3" required placeholder="e.g., Surgery, Treatment, Observation"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Additional Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Admit Patient
+                        </button>
+                        <a href="{{ url_for('receptionist.admissions') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

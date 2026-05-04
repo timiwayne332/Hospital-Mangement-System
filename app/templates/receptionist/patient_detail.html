@@ -1,0 +1,147 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Patient Details - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('receptionist.patients') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Patients
+    </a>
+</div>
+
+<!-- Patient Information -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="mb-0"><i class="fas fa-user-circle"></i> Patient Information</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td><strong>Name:</strong></td>
+                            <td>{{ patient.user.get_full_name() }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Patient ID:</strong></td>
+                            <td>{{ patient.patient_id }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Email:</strong></td>
+                            <td>{{ patient.user.email }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phone:</strong></td>
+                            <td>{{ patient.user.phone }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Date of Birth:</strong></td>
+                            <td>{{ patient.date_of_birth.strftime('%B %d, %Y') if patient.date_of_birth else '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Gender:</strong></td>
+                            <td>{{ patient.gender or '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td><strong>Blood Group:</strong></td>
+                            <td>{{ patient.blood_group or '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Address:</strong></td>
+                            <td>{{ patient.address or '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Emergency Contact:</strong></td>
+                            <td>{{ patient.emergency_contact or '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Insurance Provider:</strong></td>
+                            <td>{{ patient.insurance_provider or '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Insurance Number:</strong></td>
+                            <td>{{ patient.insurance_number or '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Health Information -->
+        <hr>
+        <h5 class="mt-3">Health Information</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Medical History:</strong></p>
+                <p class="text-muted">{{ patient.medical_history or 'None recorded' }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Allergies:</strong></p>
+                <p class="text-muted">{{ patient.allergies or 'None recorded' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Appointment History -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Appointment History</h5>
+    </div>
+    <div class="card-body">
+        {% if appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Doctor</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in appointments %}
+                        <tr>
+                            <td>{{ appointment.appointment_date.strftime('%B %d, %Y at %I:%M %p') }}</td>
+                            <td>Dr. {{ appointment.doctor.user.last_name }}</td>
+                            <td>{{ appointment.reason }}</td>
+                            <td>
+                                {% if appointment.status == 'scheduled' %}
+                                    <span class="badge bg-warning">Scheduled</span>
+                                {% elif appointment.status == 'completed' %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ appointment.notes or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted"><i class="fas fa-info-circle"></i> No appointments found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="mt-4">
+    <a href="{{ url_for('receptionist.create_appointment') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Schedule New Appointment
+    </a>
+    <a href="{{ url_for('receptionist.billing') }}" class="btn btn-info">
+        <i class="fas fa-receipt"></i> View Billing
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Messages - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-comments"></i> Messages</h5>
+                </div>
+                <div class="card-body">
+                    {% if received_messages or sent_messages %}
+                    <div class="row">
+                        <!-- Message List -->
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Received Messages</h6>
+                            {% if received_messages %}
+                                <div class="list-group">
+                                    {% for msg in received_messages|reverse %}
+                                    <a href="{{ url_for('admin.conversation', user_id=msg.sender_id) }}" class="list-group-item list-group-item-action {% if not msg.is_read %}fw-bold bg-light{% endif %}">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">{{ msg.sender.get_full_name() }}</h6>
+                                            <small>{{ msg.created_at.strftime('%d %b %H:%M') }}</small>
+                                        </div>
+                                        <p class="mb-1">{{ msg.content[:50] }}{% if msg.content|length > 50 %}...{% endif %}</p>
+                                        {% if not msg.is_read %}
+                                        <small class="badge bg-primary">Unread</small>
+                                        {% endif %}
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No received messages.</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Quick Access -->
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Recent Conversations</h6>
+                            <div class="alert alert-info">
+                                <small><i class="fas fa-info-circle"></i> View all conversations with doctors.</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No messages yet. Start messaging with doctors.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hospital Management System{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #1f77d2;
+            --secondary-color: #0d6efd;
+            --danger-color: #dc3545;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+        
+        .sidebar {
+            background-color: #fff;
+            min-height: calc(100vh - 70px);
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .sidebar .nav-link {
+            color: #495057;
+            border-left: 3px solid transparent;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: var(--primary-color);
+            background-color: #f8f9fa;
+            border-left-color: var(--primary-color);
+        }
+        
+        .sidebar .nav-link i {
+            width: 20px;
+            text-align: center;
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            padding: 2rem;
+        }
+        
+        .card {
+            border: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: 0;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #1563a8;
+            border-color: #1563a8;
+        }
+        
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background-color: #198754;
+        }
+        
+        .badge-warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+        
+        .badge-danger {
+            background-color: #dc3545;
+        }
+        
+        .badge-info {
+            background-color: #0dcaf0;
+            color: #000;
+        }
+        
+        .alert {
+            border: 0;
+            border-radius: 8px;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            padding: 0.6rem 0.75rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(31, 119, 210, 0.25);
+        }
+        
+        .table {
+            background-color: #fff;
+        }
+        
+        .table thead {
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .table thead th {
+            color: #495057;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .stat-card {
+            border: 0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            color: white;
+        }
+        
+        .stat-card.primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+        
+        .stat-card.success {
+            background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        }
+        
+        .stat-card.warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        }
+        
+        .stat-card.danger {
+            background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+        }
+        
+        .stat-card h5 {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+                <i class="fas fa-hospital"></i> Hospital MS
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle"></i> {{ current_user.get_full_name() or current_user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                {% if current_user.role.value == 'patient' %}
+                                    <li><a class="dropdown-item" href="{{ url_for('patient.profile') }}">
+                                        <i class="fas fa-user"></i> My Profile
+                                    </a></li>
+                                {% endif %}
+                                {% if current_user.role.value == 'receptionist' %}
+                                    <li><a class="dropdown-item" href="{{ url_for('receptionist.dashboard') }}">
+                                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                                    </a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a></li>
+                            </ul>
+                        </li>
+                        {% if current_user.role.value == 'receptionist' %}
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{{ url_for('receptionist.dashboard') }}" id="navbar-notifications" title="Payment Notifications">
+                                <i class="fas fa-bell"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="nav-notification-badge" style="display: none;">
+                                    0
+                                </span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="container-fluid mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    {% if current_user.is_authenticated %}
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar -->
+                <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                    <div class="position-sticky pt-3">
+                        <ul class="nav flex-column">
+                            {% if current_user.role.value == 'admin' %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">
+                                        <i class="fas fa-home"></i> Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['admin.users_list', 'admin.create_user', 'admin.edit_user'] %}active{% endif %}" href="{{ url_for('admin.users_list') }}">
+                                        <i class="fas fa-users"></i> Users
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['admin.doctors_list', 'admin.edit_doctor'] %}active{% endif %}" href="{{ url_for('admin.doctors_list') }}">
+                                        <i class="fas fa-user-md"></i> Doctors
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['admin.beds_list', 'admin.create_bed'] %}active{% endif %}" href="{{ url_for('admin.beds_list') }}">
+                                        <i class="fas fa-bed"></i> Beds
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['admin.departments_list', 'admin.create_department'] %}active{% endif %}" href="{{ url_for('admin.departments_list') }}">
+                                        <i class="fas fa-sitemap"></i> Departments
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['admin.insurances_list', 'admin.create_insurance'] %}active{% endif %}" href="{{ url_for('admin.insurances_list') }}">
+                                        <i class="fas fa-hand-holding-medical"></i> Insurances
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'admin.audit_logs' %}active{% endif %}" href="{{ url_for('admin.audit_logs') }}">
+                                        <i class="fas fa-history"></i> Audit Logs
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['admin.lab_tests_list', 'admin.create_lab_test'] %}active{% endif %}" href="{{ url_for('admin.lab_tests_list') }}">
+                                        <i class="fas fa-flask"></i> Lab Tests
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'admin.reports' %}active{% endif %}" href="{{ url_for('admin.reports') }}">
+                                        <i class="fas fa-chart-bar"></i> Reports
+                                    </a>
+                                </li>
+                            {% elif current_user.role.value == 'doctor' %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'doctor.dashboard' %}active{% endif %}" href="{{ url_for('doctor.dashboard') }}">
+                                        <i class="fas fa-home"></i> Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['doctor.appointments', 'doctor.view_appointment'] %}active{% endif %}" href="{{ url_for('doctor.appointments') }}">
+                                        <i class="fas fa-calendar-alt"></i> Appointments
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['doctor.patients', 'doctor.view_patient'] %}active{% endif %}" href="{{ url_for('doctor.patients') }}">
+                                        <i class="fas fa-users"></i> Patients
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['doctor.medical_records', 'doctor.view_medical_record'] %}active{% endif %}" href="{{ url_for('doctor.medical_records') }}">
+                                        <i class="fas fa-file-medical"></i> Medical Records
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['doctor.patient_lab_results', 'doctor.request_lab_test'] %}active{% endif %}" href="{{ url_for('doctor.patients') }}">
+                                        <i class="fas fa-flask"></i> Lab Tests
+                                    </a>
+                                </li>
+                            {% elif current_user.role.value == 'receptionist' %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'receptionist.dashboard' %}active{% endif %}" href="{{ url_for('receptionist.dashboard') }}">
+                                        <i class="fas fa-home"></i> Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['receptionist.appointments', 'receptionist.create_appointment'] %}active{% endif %}" href="{{ url_for('receptionist.appointments') }}">
+                                        <i class="fas fa-calendar-alt"></i> Appointments
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['receptionist.patients', 'receptionist.view_patient'] %}active{% endif %}" href="{{ url_for('receptionist.patients') }}">
+                                        <i class="fas fa-users"></i> Patients
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['receptionist.admissions', 'receptionist.admit_patient', 'receptionist.discharge_patient'] %}active{% endif %}" href="{{ url_for('receptionist.admissions') }}">
+                                        <i class="fas fa-door-open"></i> Admissions
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['receptionist.billing', 'receptionist.create_bill', 'receptionist.generate_receipt'] %}active{% endif %}" href="{{ url_for('receptionist.billing') }}">
+                                        <i class="fas fa-receipt"></i> Billing
+                                    </a>
+                                </li>
+                            {% elif current_user.role.value == 'lab_staff' %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'labstaff.dashboard' %}active{% endif %}" href="{{ url_for('labstaff.dashboard') }}">
+                                        <i class="fas fa-home"></i> Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['labstaff.lab_results', 'labstaff.view_lab_result'] %}active{% endif %}" href="{{ url_for('labstaff.lab_results') }}">
+                                        <i class="fas fa-flask"></i> Lab Results
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'patient.dashboard' %}active{% endif %}" href="{{ url_for('patient.dashboard') }}">
+                                        <i class="fas fa-home"></i> Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['patient.appointments', 'patient.view_appointment'] %}active{% endif %}" href="{{ url_for('patient.appointments') }}">
+                                        <i class="fas fa-calendar-alt"></i> Appointments
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['patient.medical_records', 'patient.view_medical_record'] %}active{% endif %}" href="{{ url_for('patient.medical_records') }}">
+                                        <i class="fas fa-file-medical"></i> Medical Records
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['patient.lab_results', 'patient.view_lab_result'] %}active{% endif %}" href="{{ url_for('patient.lab_results') }}">
+                                        <i class="fas fa-flask"></i> Lab Results
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['patient.billing', 'patient.view_bill'] %}active{% endif %}" href="{{ url_for('patient.billing') }}">
+                                        <i class="fas fa-receipt"></i> Billing
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['patient.profile', 'patient.edit_profile'] %}active{% endif %}" href="{{ url_for('patient.profile') }}">
+                                        <i class="fas fa-user"></i> My Profile
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </nav>
+
+                <!-- Main Content -->
+                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                    <div class="main-content">
+                        {% block content %}{% endblock %}
+                    </div>
+                </main>
+            </div>
+        </div>
+    {% else %}
+        <div style="min-height: calc(100vh - 70px); padding: 2rem;">
+            {% block auth_content %}{% endblock %}
+        </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer class="bg-light py-4 mt-5 border-top">
+        <div class="container text-center text-muted">
+            <p>&copy; 2026 Hospital Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

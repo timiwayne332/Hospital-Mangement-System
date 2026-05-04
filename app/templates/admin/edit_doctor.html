@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Edit Doctor - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-user-md"></i> Edit Doctor Profile</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <p><strong>{{ doctor.user.get_full_name() }}</strong></p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="specialization" class="form-label">Specialization *</label>
+                        <input type="text" class="form-control" id="specialization" name="specialization" value="{{ doctor.specialization }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="license_number" class="form-label">License Number</label>
+                        <input type="text" class="form-control" id="license_number" name="license_number" value="{{ doctor.license_number or '' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="qualification" class="form-label">Qualification</label>
+                        <textarea class="form-control" id="qualification" name="qualification" rows="2">{{ doctor.qualification or '' }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">Bio</label>
+                        <textarea class="form-control" id="bio" name="bio" rows="3">{{ doctor.bio or '' }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="consultation_fee" class="form-label">Consultation Fee ($)</label>
+                        <input type="number" class="form-control" id="consultation_fee" name="consultation_fee" step="0.01" value="{{ doctor.consultation_fee }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="working_hours" class="form-label">Working Hours</label>
+                        <input type="text" class="form-control" id="working_hours" name="working_hours" placeholder="e.g., 09:00-17:00" value="{{ doctor.working_hours or '' }}">
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_available" name="is_available" {% if doctor.is_available %}checked{% endif %}>
+                        <label class="form-check-label" for="is_available">Available</label>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <a href="{{ url_for('admin.doctors_list') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

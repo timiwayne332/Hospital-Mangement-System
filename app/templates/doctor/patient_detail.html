@@ -1,0 +1,189 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Patient Details - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <a href="{{ url_for('doctor.patients') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Patients
+    </a>
+    <a href="{{ url_for('doctor.request_lab_test', patient_id=patient.id) }}" class="btn btn-warning">
+        <i class="fas fa-vials"></i> Request Lab Test
+    </a>
+</div>
+
+<!-- Patient Information -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="mb-0"><i class="fas fa-user-circle"></i> Patient Information</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td><strong>Name:</strong></td>
+                            <td>{{ patient.user.get_full_name() }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Patient ID:</strong></td>
+                            <td>{{ patient.patient_id }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Email:</strong></td>
+                            <td>{{ patient.user.email }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phone:</strong></td>
+                            <td>{{ patient.user.phone }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Date of Birth:</strong></td>
+                            <td>{{ patient.date_of_birth.strftime('%B %d, %Y') if patient.date_of_birth else '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Gender:</strong></td>
+                            <td>{{ patient.gender or '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td><strong>Blood Group:</strong></td>
+                            <td>{{ patient.blood_group or '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Address:</strong></td>
+                            <td>{{ patient.address or '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Emergency Contact:</strong></td>
+                            <td>{{ patient.emergency_contact or '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Insurance Provider:</strong></td>
+                            <td>{{ patient.insurance_provider or '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Insurance Number:</strong></td>
+                            <td>{{ patient.insurance_number or '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Health Information -->
+        <hr>
+        <h5 class="mt-3">Health Information</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Medical History:</strong></p>
+                <p class="text-muted">{{ patient.medical_history or 'None recorded' }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Allergies:</strong></p>
+                <p class="text-muted">{{ patient.allergies or 'None recorded' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Medical Records -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-file-medical"></i> Medical Records</h5>
+    </div>
+    <div class="card-body">
+        {% if medical_records %}
+            <div class="accordion" id="recordsAccordion">
+                {% for record in medical_records %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button {% if loop.index != 1 %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#record{{ record.id }}">
+                            <strong>{{ record.visit_date.strftime('%B %d, %Y') }}</strong>
+                            {% if record.doctor %} - Dr. {{ record.doctor.user.last_name }}{% endif %}
+                        </button>
+                    </h2>
+                    <div id="record{{ record.id }}" class="accordion-collapse collapse {% if loop.index == 1 %}show{% endif %}" data-bs-parent="#recordsAccordion">
+                        <div class="accordion-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Diagnosis:</strong></p>
+                                    <p>{{ record.diagnosis }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Treatment:</strong></p>
+                                    <p>{{ record.treatment }}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Prescription:</strong></p>
+                                    <p>{{ record.prescription or 'None' }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Visit Notes:</strong></p>
+                                    <p>{{ record.visit_notes or 'None' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted"><i class="fas fa-info-circle"></i> No medical records found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Lab Results -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-flask"></i> Lab Results</h5>
+    </div>
+    <div class="card-body">
+        {% if lab_results %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Test Name</th>
+                            <th>Result Value</th>
+                            <th>Normal Range</th>
+                            <th>Status</th>
+                            <th>Test Date</th>
+                            <th>Result Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in lab_results %}
+                        <tr>
+                            <td>{{ result.lab_test.test_name }}</td>
+                            <td>{{ result.result_value }}</td>
+                            <td>{{ result.normal_range }}</td>
+                            <td>
+                                {% if result.status == 'normal' %}
+                                    <span class="badge bg-success">Normal</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Abnormal</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ result.test_date.strftime('%B %d, %Y') if result.test_date else '-' }}</td>
+                            <td>{{ result.result_date.strftime('%B %d, %Y') if result.result_date else 'Pending' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted"><i class="fas fa-info-circle"></i> No lab results found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

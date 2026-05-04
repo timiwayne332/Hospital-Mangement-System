@@ -1,0 +1,111 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Admissions - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-door-open"></i> Patient Admissions</h2>
+    <a href="{{ url_for('receptionist.admit_patient') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> New Admission
+    </a>
+</div>
+
+<!-- Filter -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="GET" class="d-flex gap-2">
+            <select name="status" class="form-select form-select-sm">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                <option value="admitted" {% if status_filter == 'admitted' %}selected{% endif %}>Admitted</option>
+                <option value="discharged" {% if status_filter == 'discharged' %}selected{% endif %}>Discharged</option>
+            </select>
+            <button type="submit" class="btn btn-sm btn-outline-primary">Filter</button>
+        </form>
+    </div>
+</div>
+
+<!-- Admissions Table -->
+<div class="card">
+    <div class="card-body">
+        {% if admissions.items %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Bed</th>
+                        <th>Admission Date</th>
+                        <th>Discharge Date</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for admission in admissions.items %}
+                    <tr>
+                        <td>{{ admission.patient.user.get_full_name() }}</td>
+                        <td>{{ admission.bed.bed_number if admission.bed else '-' }}</td>
+                        <td>{{ admission.admission_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ admission.discharge_date.strftime('%Y-%m-%d') if admission.discharge_date else '-' }}</td>
+                        <td>{{ admission.reason }}</td>
+                        <td>
+                            {% if admission.status == 'admitted' %}
+                                <span class="badge badge-success">Admitted</span>
+                            {% else %}
+                                <span class="badge badge-secondary">Discharged</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if admission.status == 'admitted' %}
+                                <form action="{{ url_for('receptionist.discharge_patient', admission_id=admission.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Discharge patient?')">
+                                        <i class="fas fa-sign-out-alt"></i> Discharge
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if admissions.pages > 1 %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if admissions.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('receptionist.admissions', page=admissions.prev_num) }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for page_num in admissions.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num == admissions.page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('receptionist.admissions', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if admissions.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('receptionist.admissions', page=admissions.next_num) }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <p class="text-muted text-center my-3">No admissions recorded.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

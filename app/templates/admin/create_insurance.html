@@ -1,0 +1,72 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Create Insurance - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-hand-holding-medical"></i> Add Insurance Partner</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Insurance Name *</label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="e.g., HealthPlus HMO">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Insurance Code *</label>
+                        <input type="text" class="form-control" id="code" name="code" required placeholder="e.g., HMO01">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="insurance_type" class="form-label">Insurance Type</label>
+                        <select class="form-select" id="insurance_type" name="insurance_type">
+                            <option value="">Select Type</option>
+                            <option value="HMO">HMO</option>
+                            <option value="PPO">PPO</option>
+                            <option value="Group">Group</option>
+                            <option value="Individual">Individual</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contact_person" class="form-label">Contact Person</label>
+                        <input type="text" class="form-control" id="contact_person" name="contact_person" placeholder="e.g., Jane Smith">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="phone" name="phone" placeholder="e.g., +1 555 789 0123">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="e.g., billing@example.com">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <textarea class="form-control" id="address" name="address" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="coverage_percentage" class="form-label">Coverage Percentage</label>
+                        <input type="number" class="form-control" id="coverage_percentage" name="coverage_percentage" value="80" min="0" max="100">
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Insurance
+                        </button>
+                        <a href="{{ url_for('admin.insurances_list') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
