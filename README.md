@@ -199,6 +199,7 @@ After running the seed script, you can log in with these credentials:
 | Doctor | doctor1 | doctor123 |
 | Receptionist | receptionist | receptionist123 |
 | Patient | patient1 | patient123 |
+|Labstaff | labstaff| labstaff123
 
 ## Usage Guide
 
