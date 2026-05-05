@@ -28,7 +28,7 @@ def seed_database():
             email='admin@hospital.com',
             first_name='Admin',
             last_name='User',
-            phone='1234567890',
+            phone='07039932390',
             role=UserRole.ADMIN
         )
         admin.set_password('admin123')
