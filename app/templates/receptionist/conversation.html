@@ -27,6 +27,46 @@
                 </div>
             </div>
 
+                    <div class="card mb-3">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0"><i class="fas fa-users"></i> Receptionists</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                {% for rec in receptionists %}
+                                <a href="{{ url_for('receptionist.conversation', user_id=rec.id) }}" class="list-group-item list-group-item-action {% if rec.id == other_user.id %}active{% endif %}">
+                                    <i class="fas fa-user"></i> {{ rec.get_full_name() }}
+                                </a>
+                                {% endfor %}
+                                {% if not receptionists %}
+                                <div class="p-3 text-muted text-center">
+                                    <small>No receptionists available</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header bg-light text-dark">
+                            <h6 class="mb-0"><i class="fas fa-vial"></i> Lab Staff</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                {% for lab in lab_staff %}
+                                <a href="{{ url_for('receptionist.conversation', user_id=lab.id) }}" class="list-group-item list-group-item-action {% if lab.id == other_user.id %}active{% endif %}">
+                                    <i class="fas fa-flask"></i> {{ lab.get_full_name() }}
+                                </a>
+                                {% endfor %}
+                                {% if not lab_staff %}
+                                <div class="p-3 text-muted text-center">
+                                    <small>No lab staff available</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
             <div class="card">
                 <div class="card-header bg-warning text-dark">
                     <h6 class="mb-0"><i class="fas fa-user-shield"></i> Admins</h6>
