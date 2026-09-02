@@ -1,0 +1,38 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Drugs - Pharmacy{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between mb-3">
+        <h3>Drugs</h3>
+        <a href="{{ url_for('pharmacy.add_drug') }}" class="btn btn-primary">Add Drug</a>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Quantity</th>
+                        <th>Unit</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in drugs %}
+                    <tr>
+                        <td>{{ d.code }}</td>
+                        <td>{{ d.name }}</td>
+                        <td>{{ d.quantity }}</td>
+                        <td>{{ d.unit }}</td>
+                        <td>{{ d.unit_price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

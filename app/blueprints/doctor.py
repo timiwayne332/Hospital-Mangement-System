@@ -361,6 +361,7 @@ def conversation(user_id):
     other_doctors = [u for u in users if u.role == UserRole.DOCTOR]
     receptionists = [u for u in users if u.role == UserRole.RECEPTIONIST]
     lab_staff = [u for u in users if u.role == UserRole.LAB_STAFF]
+    pharmacists = [u for u in users if u.role == UserRole.PHARMACIST]
     
     return render_template('doctor/conversation.html',
                          messages=messages,
@@ -368,7 +369,8 @@ def conversation(user_id):
                          admins=admins,
                          other_doctors=other_doctors,
                          receptionists=receptionists,
-                         lab_staff=lab_staff)
+                         lab_staff=lab_staff,
+                         pharmacists=pharmacists)
 
 
 @doctor_bp.route('/messages/send/<int:recipient_id>', methods=['POST'])

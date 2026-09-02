@@ -16,6 +16,7 @@ class UserRole(enum.Enum):
     DOCTOR = 'doctor'
     RECEPTIONIST = 'receptionist'
     LAB_STAFF = 'lab_staff'
+    PHARMACIST = 'pharmacist'
     PATIENT = 'patient'
 
 
@@ -151,6 +152,24 @@ class LabStaff(db.Model):
         return f'<LabStaff {self.lab_staff_id}>'
 
 
+class Pharmacist(db.Model):
+    """Pharmacist model"""
+    __tablename__ = 'pharmacists'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    pharmacist_id = db.Column(db.String(20), unique=True, nullable=False)
+    license_number = db.Column(db.String(50), unique=True)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = db.relationship('User', backref='pharmacist', foreign_keys=[user_id])
+
+    def __repr__(self):
+        return f'<Pharmacist {self.pharmacist_id}>'
+
+
 class Appointment(db.Model):
     """Appointment model"""
     __tablename__ = 'appointments'
@@ -194,6 +213,47 @@ class MedicalRecord(db.Model):
     
     def __repr__(self):
         return f'<MedicalRecord {self.id}>'
+
+
+class Drug(db.Model):
+    """Pharmacy drug catalog"""
+    __tablename__ = 'drugs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    code = db.Column(db.String(50), unique=True, nullable=False)
+    description = db.Column(db.Text)
+    quantity = db.Column(db.Integer, default=0)
+    unit = db.Column(db.String(20), default='pcs')
+    unit_price = db.Column(db.Float, default=0.0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Drug {self.name} ({self.code})>'
+
+
+class PatientDrugAssignment(db.Model):
+    """Drugs assigned/prescribed to a patient and managed by pharmacy"""
+    __tablename__ = 'patient_drug_assignments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    drug_id = db.Column(db.Integer, db.ForeignKey('drugs.id'), nullable=False)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=True)
+    pharmacist_id = db.Column(db.Integer, db.ForeignKey('pharmacists.id'), nullable=True)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+    status = db.Column(db.String(30), default='prescribed')  # prescribed, dispensed, cancelled
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    drug = db.relationship('Drug', foreign_keys=[drug_id])
+    patient = db.relationship('Patient', foreign_keys=[patient_id])
+    doctor = db.relationship('Doctor', foreign_keys=[doctor_id])
+    pharmacist = db.relationship('Pharmacist', foreign_keys=[pharmacist_id])
+
+    def __repr__(self):
+        return f'<PatientDrugAssignment {self.id} - {self.drug.name} -> {self.patient.patient_id}>'
 
 
 class Admission(db.Model):
