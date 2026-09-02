@@ -176,6 +176,14 @@ def delete_user(user_id):
     user = User.query.get_or_404(user_id)
     
     try:
+        # Remove associated role-specific records first to avoid NOT NULL FK updates
+        if hasattr(user, 'doctor') and user.doctor:
+            db.session.delete(user.doctor)
+        if hasattr(user, 'patient') and user.patient:
+            db.session.delete(user.patient)
+        if hasattr(user, 'lab_staff') and user.lab_staff:
+            db.session.delete(user.lab_staff)
+
         db.session.delete(user)
         db.session.commit()
         log_audit('Deleted', 'User', user_id, details=f'Admin deleted user {user.username}')
