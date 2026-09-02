@@ -55,6 +55,7 @@ def create_app(config_name='development'):
     from app.blueprints.main import main_bp
     from app.blueprints.prescription import prescription_bp
     from app.blueprints.labstaff import labstaff_bp
+    from app.blueprints.pharmacy import pharmacy_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
@@ -64,5 +65,6 @@ def create_app(config_name='development'):
     app.register_blueprint(main_bp)
     app.register_blueprint(prescription_bp)
     app.register_blueprint(labstaff_bp)
+    app.register_blueprint(pharmacy_bp)
     
     return app

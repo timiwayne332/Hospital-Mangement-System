@@ -4,7 +4,7 @@ Run: python seed_database.py
 """
 from app import create_app, db
 from app.models import (
-    User, Patient, Doctor, LabStaff, Appointment, MedicalRecord, 
+    User, Patient, Doctor, LabStaff, Pharmacist, Appointment, MedicalRecord, 
     Medicine, LabTest, Bed, BillingRecord, UserRole
 )
 from datetime import datetime, timedelta
@@ -108,6 +108,28 @@ def seed_database():
             certification='Certified Medical Laboratory Technician'
         )
         db.session.add(lab_staff)
+        db.session.commit()
+        
+        # Create Pharmacist
+        print("Creating pharmacist...")
+        pharmacist_user = User(
+            username='pharmacist1',
+            email='pharmacist1@hospital.com',
+            first_name='Pharm',
+            last_name='One',
+            phone='4444444444',
+            role=UserRole.PHARMACIST
+        )
+        pharmacist_user.set_password('pharm123')
+        db.session.add(pharmacist_user)
+        db.session.commit()
+        
+        pharmacist = Pharmacist(
+            user_id=pharmacist_user.id,
+            pharmacist_id=f'PHM{pharmacist_user.id:05d}',
+            license_number='PHM-LIC-001'
+        )
+        db.session.add(pharmacist)
         db.session.commit()
         
         # Create Patients
@@ -269,6 +291,7 @@ def seed_database():
         print("   Receptionist: receptionist / receptionist123")
         print("   Lab Staff: labstaff / labstaff123")
         print("   Patient: patient1 / patient123")
+        print("   Pharmacist: pharmacist1 / pharm123")
         print("\nAll tables populated with sample data.")
 
 
