@@ -546,13 +546,20 @@ def conversation(user_id):
             msg.is_read = True
     db.session.commit()
     
-    # Get list of doctors
-    doctors = User.query.filter_by(role=UserRole.DOCTOR).all()
-    
+    # Get lists of users by role for sidebar (exclude current user)
+    users = User.query.filter(User.id != admin.id).order_by(User.role, User.first_name).all()
+    doctors = [u for u in users if u.role == UserRole.DOCTOR]
+    admins = [u for u in users if u.role == UserRole.ADMIN]
+    receptionists = [u for u in users if u.role == UserRole.RECEPTIONIST]
+    lab_staff = [u for u in users if u.role == UserRole.LAB_STAFF]
+
     return render_template('admin/conversation.html',
                          messages=messages,
                          other_user=other_user,
-                         doctors=doctors)
+                         doctors=doctors,
+                         admins=admins,
+                         receptionists=receptionists,
+                         lab_staff=lab_staff)
 
 
 @admin_bp.route('/messages/send/<int:recipient_id>', methods=['POST'])
