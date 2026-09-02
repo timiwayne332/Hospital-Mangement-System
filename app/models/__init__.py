@@ -47,9 +47,9 @@ class User(UserMixin, db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    patient = db.relationship('Patient', uselist=False, back_populates='user', foreign_keys='Patient.user_id')
-    doctor = db.relationship('Doctor', uselist=False, back_populates='user', foreign_keys='Doctor.user_id')
-    lab_staff = db.relationship('LabStaff', uselist=False, back_populates='user', foreign_keys='LabStaff.user_id')
+    patient = db.relationship('Patient', uselist=False, back_populates='user', foreign_keys='Patient.user_id', cascade='all, delete-orphan', passive_deletes=True)
+    doctor = db.relationship('Doctor', uselist=False, back_populates='user', foreign_keys='Doctor.user_id', cascade='all, delete-orphan', passive_deletes=True)
+    lab_staff = db.relationship('LabStaff', uselist=False, back_populates='user', foreign_keys='LabStaff.user_id', cascade='all, delete-orphan', passive_deletes=True)
     
     def set_password(self, password):
         """Hash and set password"""
@@ -107,7 +107,7 @@ class Doctor(db.Model):
     __tablename__ = 'doctors'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'))
     doctor_id = db.Column(db.String(20), unique=True, nullable=False)
     specialization = db.Column(db.String(120), nullable=False)
@@ -137,7 +137,7 @@ class LabStaff(db.Model):
     __tablename__ = 'lab_staff'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     lab_staff_id = db.Column(db.String(20), unique=True, nullable=False)
     department = db.Column(db.String(120))
     certification = db.Column(db.Text)
