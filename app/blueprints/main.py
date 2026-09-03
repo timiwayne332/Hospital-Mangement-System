@@ -5,7 +5,8 @@ from flask import Blueprint, render_template, redirect, url_for
 from flask_login import login_required, current_user
 from app.models import (
     User, Patient, Doctor, Appointment, BillingRecord, 
-    Medicine, LabTest, Bed, UserRole, Department, AppointmentStatus, db
+    Medicine, LabTest, Bed, UserRole, Department, AppointmentStatus, db,
+    PatientDrugAssignment
 )
 from sqlalchemy import func
 from datetime import datetime, timedelta
@@ -124,6 +125,14 @@ def dashboard():
         ).all()
         
         return render_template('receptionist/dashboard.html', stats=stats)
+    
+    elif current_user.role == UserRole.PHARMACIST:
+        # Pharmacist dashboard statistics
+        pharmacist = current_user.pharmacist
+        stats['total_drugs'] = Medicine.query.count()
+        stats['low_stock'] = Medicine.query.filter(Medicine.quantity <= Medicine.min_stock_level).count()
+        stats['pending_assignments'] = PatientDrugAssignment.query.filter_by(status='pending').count() if 'PatientDrugAssignment' in globals() else 0
+        return render_template('pharmacy/dashboard.html', stats=stats)
     
     else:
         # Patient dashboard
