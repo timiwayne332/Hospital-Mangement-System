@@ -1,0 +1,83 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Dashboard - Hospital Management System{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+
+{# Admin panel #}
+{% if current_user.role == 'admin' or current_user.role == 'ADMIN' or current_user.role == 'Admin' or current_user.is_authenticated and current_user.role == 'admin' %}
+<div class="card mb-3">
+    <div class="card-header">Admin Overview</div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">Total Patients: <strong>{{ admin.total_patients }}</strong></div>
+            <div class="col-md-3">Total Doctors: <strong>{{ admin.total_doctors }}</strong></div>
+            <div class="col-md-3">Total Medicines: <strong>{{ admin.total_medicines }}</strong></div>
+            <div class="col-md-3">Available Beds: <strong>{{ admin.available_beds }}</strong></div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{# Doctor panel #}
+{% if current_user.role == 'doctor' and doctor %}
+<div class="card mb-3">
+    <div class="card-header">Doctor Overview</div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">My Patients: <strong>{{ doctor.total_patients }}</strong></div>
+            <div class="col-md-4">Pending Appointments: <strong>{{ doctor.pending_appointments }}</strong></div>
+            <div class="col-md-4">Completed Appointments: <strong>{{ doctor.completed_appointments }}</strong></div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{# Pharmacist panel #}
+{% if current_user.role == 'pharmacist' %}
+<div class="card mb-3">
+    <div class="card-header">Pharmacy Overview</div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">Total Drugs: <strong>{{ pharmacist.total_drugs }}</strong></div>
+            <div class="col-md-4">Low Stock: <strong>{{ pharmacist.low_stock }}</strong></div>
+            <div class="col-md-4">Pending Assignments: <strong>{{ pharmacist.pending_assignments }}</strong></div>
+        </div>
+        <div class="mt-3">
+            <a href="{{ url_for('pharmacy.drugs') }}" class="btn btn-primary">Manage Drugs</a>
+            <a href="{{ url_for('pharmacy.assignments') }}" class="btn btn-secondary">Assignments</a>
+        </div>
+    </div>
+    
+</div>
+{% endif %}
+
+{# Receptionist panel #}
+{% if current_user.role == 'receptionist' %}
+<div class="card mb-3">
+    <div class="card-header">Receptionist Overview</div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">Total Patients: <strong>{{ receptionist.total_patients }}</strong></div>
+            <div class="col-md-3">Appointments: <strong>{{ receptionist.total_appointments }}</strong></div>
+            <div class="col-md-3">Pending Appointments: <strong>{{ receptionist.pending_appointments }}</strong></div>
+            <div class="col-md-3">Pending Bills: <strong>{{ receptionist.pending_bills }}</strong></div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{# Patient panel #}
+{% if current_user.role == 'patient' and patient %}
+<div class="card mb-3">
+    <div class="card-header">My Patient Overview</div>
+    <div class="card-body">
+        <p>Upcoming Appointments: <strong>{{ patient.upcoming_appointments|length }}</strong></p>
+        <p>Pending Bills: <strong>{{ patient.pending_bills|length }}</strong></p>
+        <a href="{{ url_for('patient.appointments') }}" class="btn btn-primary">View Appointments</a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

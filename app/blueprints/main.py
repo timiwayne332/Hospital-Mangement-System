@@ -5,7 +5,8 @@ from flask import Blueprint, render_template, redirect, url_for
 from flask_login import login_required, current_user
 from app.models import (
     User, Patient, Doctor, Appointment, BillingRecord, 
-    Medicine, LabTest, Bed, UserRole, Department, AppointmentStatus, db
+    Medicine, LabTest, Bed, UserRole, Department, AppointmentStatus, db,
+    PatientDrugAssignment
 )
 from sqlalchemy import func
 from datetime import datetime, timedelta
@@ -24,117 +25,63 @@ def index():
 @main_bp.route('/dashboard')
 @login_required
 def dashboard():
-    """Main dashboard for all users"""
-    
-    # Get statistics based on user role
-    stats = {}
-    
-    if current_user.role == UserRole.ADMIN:
-        # Admin dashboard statistics
-        stats['total_patients'] = Patient.query.count()
-        stats['total_doctors'] = Doctor.query.count()
-        stats['total_users'] = User.query.count()
-        stats['total_appointments'] = Appointment.query.count()
-        stats['pending_bills'] = BillingRecord.query.filter_by(payment_status='pending').count()
-        stats['total_medicines'] = Medicine.query.count()
-        stats['low_stock_medicines'] = Medicine.query.filter(
-            Medicine.quantity <= Medicine.min_stock_level
-        ).count()
-        stats['available_beds'] = Bed.query.filter_by(is_available=True).count()
-        stats['total_beds'] = Bed.query.count()
-        
-        # Today's appointments
-        today = datetime.utcnow().date()
-        today_appointments = Appointment.query.filter(
-            func.date(Appointment.appointment_date) == today
-        ).all()
-        
-        # Recent billing records
-        recent_bills = BillingRecord.query.order_by(
-            BillingRecord.created_at.desc()
-        ).limit(5).all()
+    """Unified dashboard showing role-specific panels on one page."""
 
-        status_counts = [
-            {
-                'status': status.value.replace('_', ' ').title(),
-                'count': Appointment.query.filter_by(status=status.value).count()
-            }
-            for status in AppointmentStatus
-        ]
+    # Admin stats
+    admin_stats = {
+        'total_patients': Patient.query.count(),
+        'total_doctors': Doctor.query.count(),
+        'total_users': User.query.count(),
+        'total_appointments': Appointment.query.count(),
+        'pending_bills': BillingRecord.query.filter_by(payment_status='pending').count(),
+        'total_medicines': Medicine.query.count(),
+        'low_stock_medicines': Medicine.query.filter(Medicine.quantity <= Medicine.min_stock_level).count() if hasattr(Medicine, 'min_stock_level') else 0,
+        'available_beds': Bed.query.filter_by(is_available=True).count(),
+        'total_beds': Bed.query.count()
+    }
 
-        department_data = db.session.query(
-            Department.name,
-            func.count(Doctor.id)
-        ).join(Doctor, Doctor.department_id == Department.id).group_by(Department.id).all()
+    # Doctor stats (for current user's doctor record)
+    doctor_stats = {}
+    if current_user.role == UserRole.DOCTOR and hasattr(current_user, 'doctor') and current_user.doctor:
+        doc = current_user.doctor
+        doctor_stats = {
+            'total_patients': Appointment.query.filter_by(doctor_id=doc.id).distinct(Appointment.patient_id).count(),
+            'pending_appointments': Appointment.query.filter_by(doctor_id=doc.id, status='scheduled').count(),
+            'completed_appointments': Appointment.query.filter_by(doctor_id=doc.id, status='completed').count(),
+        }
 
-        department_counts = [
-            {'department': name, 'count': count}
-            for name, count in department_data
-        ]
-        
-        return render_template('admin/dashboard.html', 
-                             stats=stats, 
-                             today_appointments=today_appointments,
-                             recent_bills=recent_bills,
-                             status_counts=status_counts,
-                             department_counts=department_counts)
-    
-    elif current_user.role == UserRole.DOCTOR:
-        # Doctor dashboard statistics
-        doctor = current_user.doctor
-        if doctor:
-            stats['total_patients'] = Appointment.query.filter_by(
-                doctor_id=doctor.id
-            ).distinct(Appointment.patient_id).count()
-            stats['pending_appointments'] = Appointment.query.filter_by(
-                doctor_id=doctor.id,
-                status='scheduled'
-            ).count()
-            stats['completed_appointments'] = Appointment.query.filter_by(
-                doctor_id=doctor.id,
-                status='completed'
-            ).count()
-            
-            # Today's appointments
-            today = datetime.utcnow().date()
-            stats['today_appointments'] = Appointment.query.filter_by(
-                doctor_id=doctor.id,
-                status='scheduled'
-            ).filter(
-                func.date(Appointment.appointment_date) == today
-            ).all()
-        
-        return render_template('doctor/dashboard.html', stats=stats)
-    
-    elif current_user.role == UserRole.RECEPTIONIST:
-        # Receptionist dashboard statistics
-        stats['total_patients'] = Patient.query.count()
-        stats['total_appointments'] = Appointment.query.count()
-        stats['pending_appointments'] = Appointment.query.filter_by(
-            status='scheduled'
-        ).count()
-        stats['pending_bills'] = BillingRecord.query.filter_by(
-            payment_status='pending'
-        ).count()
-        
-        # Today's appointments
-        today = datetime.utcnow().date()
-        stats['today_appointments'] = Appointment.query.filter(
-            func.date(Appointment.appointment_date) == today
-        ).all()
-        
-        return render_template('receptionist/dashboard.html', stats=stats)
-    
-    else:
-        # Patient dashboard
-        patient = current_user.patient
-        if patient:
-            stats['upcoming_appointments'] = Appointment.query.filter_by(
-                patient_id=patient.id,
-                status='scheduled'
-            ).filter(
-                Appointment.appointment_date >= datetime.utcnow()
-            ).all()
+    # Receptionist stats
+    receptionist_stats = {
+        'total_patients': Patient.query.count(),
+        'total_appointments': Appointment.query.count(),
+        'pending_appointments': Appointment.query.filter_by(status='scheduled').count(),
+        'pending_bills': BillingRecord.query.filter_by(payment_status='pending').count()
+    }
+
+    # Pharmacist stats
+    pharmacist_stats = {
+        'total_drugs': Medicine.query.count(),
+        'low_stock': Medicine.query.filter(Medicine.quantity <= Medicine.min_stock_level).count() if hasattr(Medicine, 'min_stock_level') else 0,
+        'pending_assignments': PatientDrugAssignment.query.filter_by(status='pending').count() if 'PatientDrugAssignment' in globals() else 0
+    }
+
+    # Patient stats (for current user's patient record)
+    patient_stats = {}
+    if current_user.role == UserRole.PATIENT and hasattr(current_user, 'patient') and current_user.patient:
+        p = current_user.patient
+        patient_stats = {
+            'upcoming_appointments': Appointment.query.filter_by(patient_id=p.id, status='scheduled').filter(Appointment.appointment_date >= datetime.utcnow()).all(),
+            'pending_bills': BillingRecord.query.filter_by(patient_id=p.id, payment_status='pending').all(),
+            'lab_results': p.lab_results,
+            'medical_records': p.medical_records
+        }
+
+    return render_template('main/merged_dashboard.html',
+                           admin=admin_stats,
+                           doctor=doctor_stats,
+                           receptionist=receptionist_stats,
+                           pharmacist=pharmacist_stats,
+                           patient=patient_stats)
             stats['pending_bills'] = BillingRecord.query.filter_by(
                 patient_id=patient.id,
                 payment_status='pending'
