@@ -38,23 +38,11 @@ def login():
             
             login_user(user, remember=request.form.get('remember_me'))
             
-            # Redirect based on role
+            # Redirect to unified dashboard (it will show role-specific panels)
             next_page = request.args.get('next')
             if next_page and next_page.startswith('/'):
                 return redirect(next_page)
-            
-            if user.role == UserRole.ADMIN:
-                return redirect(url_for('admin.dashboard'))
-            elif user.role == UserRole.DOCTOR:
-                return redirect(url_for('doctor.dashboard'))
-            elif user.role == UserRole.RECEPTIONIST:
-                return redirect(url_for('receptionist.dashboard'))
-            elif user.role == UserRole.LAB_STAFF:
-                return redirect(url_for('labstaff.dashboard'))
-            elif user.role == UserRole.PHARMACIST:
-                return redirect(url_for('pharmacy.dashboard'))
-            else:
-                return redirect(url_for('patient.dashboard'))
+            return redirect(url_for('main.dashboard'))
         else:
             flash('Invalid username or password.', 'danger')
     
