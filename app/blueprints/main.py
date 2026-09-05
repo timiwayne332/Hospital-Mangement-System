@@ -82,11 +82,4 @@ def dashboard():
                            receptionist=receptionist_stats,
                            pharmacist=pharmacist_stats,
                            patient=patient_stats)
-            stats['pending_bills'] = BillingRecord.query.filter_by(
-                patient_id=patient.id,
-                payment_status='pending'
-            ).all()
-            stats['lab_results'] = patient.lab_results
-            stats['medical_records'] = patient.medical_records
-        
-        return render_template('patient/dashboard.html', stats=stats)
+
