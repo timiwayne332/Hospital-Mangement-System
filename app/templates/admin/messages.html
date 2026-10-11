@@ -11,9 +11,8 @@
                     <h5 class="mb-0"><i class="fas fa-comments"></i> Messages</h5>
                 </div>
                 <div class="card-body">
-                    {% if received_messages or sent_messages %}
-                    <div class="row">
-                        <!-- Message List -->
+                    {% if received_messages or sent_messages or staff_members %}
+                    <div class="row g-4">
                         <div class="col-md-6">
                             <h6 class="text-muted mb-3">Received Messages</h6>
                             {% if received_messages %}
@@ -36,17 +35,23 @@
                             {% endif %}
                         </div>
 
-                        <!-- Quick Access -->
                         <div class="col-md-6">
-                            <h6 class="text-muted mb-3">Recent Conversations</h6>
-                            <div class="alert alert-info">
-                                <small><i class="fas fa-info-circle"></i> View all conversations with doctors.</small>
+                            <h6 class="text-muted mb-3">Department Contacts</h6>
+                            <div class="list-group">
+                                {% for staff in staff_members %}
+                                <a href="{{ url_for('admin.conversation', user_id=staff.id) }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>{{ staff.get_full_name() }}</span>
+                                        <span class="badge bg-secondary">{{ staff.role.value.replace('_', ' ').title() }}</span>
+                                    </div>
+                                </a>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
                     {% else %}
                         <div class="alert alert-info">
-                            No messages yet. Start messaging with doctors.
+                            No messages yet. Start messaging with another department.
                         </div>
                     {% endif %}
                 </div>

@@ -1,0 +1,62 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Department Messages - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-comments"></i> Department Chat</h5>
+                </div>
+                <div class="card-body">
+                    {% if received_messages or sent_messages %}
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Inbox</h6>
+                            {% if received_messages %}
+                                <div class="list-group">
+                                    {% for msg in received_messages|reverse %}
+                                    <a href="{{ url_for('labstaff.conversation', user_id=msg.sender_id) }}" class="list-group-item list-group-item-action {% if not msg.is_read %}fw-bold bg-light{% endif %}">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">{{ msg.sender.get_full_name() }}</h6>
+                                            <small>{{ msg.created_at.strftime('%d %b %H:%M') }}</small>
+                                        </div>
+                                        <p class="mb-1">{{ msg.content[:60] }}{% if msg.content|length > 60 %}...{% endif %}</p>
+                                        {% if not msg.is_read %}
+                                        <small class="badge bg-primary">Unread</small>
+                                        {% endif %}
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No received messages.</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Department Contacts</h6>
+                            <div class="list-group">
+                                {% for staff in staff_members %}
+                                <a href="{{ url_for('labstaff.conversation', user_id=staff.id) }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-user-md me-2"></i>{{ staff.get_full_name() }}</span>
+                                        <span class="badge bg-secondary">{{ staff.role.value.replace('_', ' ').title() }}</span>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info mb-0">
+                        No messages yet. Start chatting with another department.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

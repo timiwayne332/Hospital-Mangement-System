@@ -3,7 +3,7 @@ Lab Staff Blueprint - Handles lab staff access to lab results
 """
 from functools import wraps
 from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from app.models import db, UserRole, LabResult, Patient, Message, User
 
@@ -97,3 +97,115 @@ def view_lab_result(result_id):
     doctors = User.query.filter_by(role=UserRole.DOCTOR).all()
     receptionists = User.query.filter_by(role=UserRole.RECEPTIONIST).all()
     return render_template('labstaff/view_lab_result.html', result=lab_result, doctors=doctors, receptionists=receptionists)
+
+
+# ======================== Department Chat System ========================
+
+@labstaff_bp.route('/messages')
+@login_required
+@lab_staff_required
+def messages():
+    """View all department chat conversations for lab staff."""
+    sent_messages = Message.query.filter_by(sender_id=current_user.id).all()
+    received_messages = Message.query.filter_by(recipient_id=current_user.id).all()
+    unread_count = Message.query.filter_by(recipient_id=current_user.id, is_read=False).count()
+    staff_members = User.query.filter(
+        User.id != current_user.id,
+        User.role.in_([UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.LAB_STAFF])
+    ).all()
+
+    return render_template(
+        'labstaff/messages.html',
+        sent_messages=sent_messages,
+        received_messages=received_messages,
+        unread_count=unread_count,
+        staff_members=staff_members,
+    )
+
+
+@labstaff_bp.route('/messages/conversation/<int:user_id>')
+@login_required
+@lab_staff_required
+def conversation(user_id):
+    """View a direct conversation with another department user."""
+    other_user = User.query.get_or_404(user_id)
+    messages = Message.query.filter(
+        db.or_(
+            db.and_(Message.sender_id == current_user.id, Message.recipient_id == user_id),
+            db.and_(Message.sender_id == user_id, Message.recipient_id == current_user.id),
+        )
+    ).order_by(Message.created_at.asc()).all()
+
+    for msg in messages:
+        if msg.recipient_id == current_user.id and not msg.is_read:
+            msg.is_read = True
+    db.session.commit()
+
+    staff_members = User.query.filter(
+        User.id != current_user.id,
+        User.role.in_([UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.LAB_STAFF])
+    ).all()
+
+    return render_template(
+        'labstaff/conversation.html',
+        messages=messages,
+        other_user=other_user,
+        staff_members=staff_members,
+    )
+
+
+@labstaff_bp.route('/messages/send/<int:recipient_id>', methods=['POST'])
+@login_required
+@lab_staff_required
+def send_message(recipient_id):
+    """Send a message to another department."""
+    content = request.form.get('content', '').strip()
+    if not content:
+        flash('Message cannot be empty.', 'danger')
+        return redirect(url_for('labstaff.conversation', user_id=recipient_id))
+
+    recipient = User.query.get(recipient_id)
+    if not recipient or recipient.id == current_user.id:
+        flash('Invalid recipient selected.', 'danger')
+        return redirect(url_for('labstaff.messages'))
+
+    if recipient.role not in [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.LAB_STAFF]:
+        flash('You can only message other hospital departments.', 'danger')
+        return redirect(url_for('labstaff.messages'))
+
+    try:
+        message = Message(
+            sender_id=current_user.id,
+            recipient_id=recipient_id,
+            content=content,
+        )
+        db.session.add(message)
+        db.session.commit()
+        flash('Lab result sent successfully.', 'success')
+    except Exception as exc:
+        db.session.rollback()
+        flash(f'Error sending message: {str(exc)}', 'danger')
+
+    return redirect(url_for('labstaff.conversation', user_id=recipient_id))
+
+
+@labstaff_bp.route('/api/messages/<int:user_id>')
+@login_required
+@lab_staff_required
+def get_messages_api(user_id):
+    """Return message history for another department user."""
+    messages = Message.query.filter(
+        db.or_(
+            db.and_(Message.sender_id == current_user.id, Message.recipient_id == user_id),
+            db.and_(Message.sender_id == user_id, Message.recipient_id == current_user.id),
+        )
+    ).order_by(Message.created_at.asc()).all()
+
+    return jsonify([{
+        'id': m.id,
+        'sender_id': m.sender_id,
+        'sender_name': m.sender.get_full_name(),
+        'content': m.content,
+        'created_at': m.created_at.isoformat(),
+        'is_read': m.is_read,
+    } for m in messages])

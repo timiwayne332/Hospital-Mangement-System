@@ -509,11 +509,16 @@ def messages():
     
     # Get unread count
     unread_count = Message.query.filter_by(recipient_id=admin.id, is_read=False).count()
+    staff_members = User.query.filter(
+        User.id != admin.id,
+        User.role.in_([UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.LAB_STAFF])
+    ).all()
     
     return render_template('admin/messages.html',
                          sent_messages=sent_messages,
                          received_messages=received_messages,
-                         unread_count=unread_count)
+                         unread_count=unread_count,
+                         staff_members=staff_members)
 
 
 @admin_bp.route('/messages/conversation/<int:user_id>')
@@ -538,13 +543,17 @@ def conversation(user_id):
             msg.is_read = True
     db.session.commit()
     
-    # Get list of doctors
-    doctors = User.query.filter_by(role=UserRole.DOCTOR).all()
+    # Get the full list of staff across departments so admin messages can be shared across teams.
+    staff_members = User.query.filter(
+        User.id != admin.id,
+        User.role.in_([UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.LAB_STAFF])
+    ).all()
     
     return render_template('admin/conversation.html',
                          messages=messages,
                          other_user=other_user,
-                         doctors=doctors)
+                         doctors=staff_members,
+                         staff_members=staff_members)
 
 
 @admin_bp.route('/messages/send/<int:recipient_id>', methods=['POST'])

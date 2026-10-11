@@ -11,9 +11,8 @@
                     <h5 class="mb-0"><i class="fas fa-comments"></i> Messages</h5>
                 </div>
                 <div class="card-body">
-                    {% if received_messages or sent_messages %}
-                    <div class="row">
-                        <!-- Message List -->
+                    {% if received_messages or sent_messages or staff_members %}
+                    <div class="row g-4">
                         <div class="col-md-6">
                             <h6 class="text-muted mb-3">Received Messages</h6>
                             {% if received_messages %}
@@ -36,25 +35,23 @@
                             {% endif %}
                         </div>
 
-                        <!-- Quick Access -->
                         <div class="col-md-6">
-                            <h6 class="text-muted mb-3">Start a Conversation</h6>
+                            <h6 class="text-muted mb-3">Department Contacts</h6>
                             <div class="list-group">
-                                <h6 class="list-group-item">Administrators</h6>
-                                {% for admin in [] %}
-                                <a href="{{ url_for('doctor.conversation', user_id=admin.id) }}" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-user-tie"></i> {{ admin.get_full_name() }}
+                                {% for staff in staff_members %}
+                                <a href="{{ url_for('doctor.conversation', user_id=staff.id) }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>{{ staff.get_full_name() }}</span>
+                                        <span class="badge bg-secondary">{{ staff.role.value.replace('_', ' ').title() }}</span>
+                                    </div>
                                 </a>
                                 {% endfor %}
-                                <div class="alert alert-info m-2 mb-0">
-                                    <small><i class="fas fa-info-circle"></i> Navigate to a conversation to start messaging.</small>
-                                </div>
                             </div>
                         </div>
                     </div>
                     {% else %}
                         <div class="alert alert-info">
-                            No messages yet. Start a conversation by clicking on an admin or colleague below.
+                            No messages yet. Start messaging with another department.
                         </div>
                     {% endif %}
                 </div>

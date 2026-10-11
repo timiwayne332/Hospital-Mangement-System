@@ -326,11 +326,16 @@ def messages():
     
     # Get unread count
     unread_count = Message.query.filter_by(recipient_id=doctor.id, is_read=False).count()
+    staff_members = User.query.filter(
+        User.id != doctor.id,
+        User.role.in_([UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.LAB_STAFF])
+    ).all()
     
     return render_template('doctor/messages.html',
                          sent_messages=sent_messages,
                          received_messages=received_messages,
-                         unread_count=unread_count)
+                         unread_count=unread_count,
+                         staff_members=staff_members)
 
 
 @doctor_bp.route('/messages/conversation/<int:user_id>')
@@ -355,7 +360,11 @@ def conversation(user_id):
             msg.is_read = True
     db.session.commit()
     
-    # Get list of admins or other doctors for sidebar
+    # Get all staff departments for sidebar and cross-department messaging.
+    staff_members = User.query.filter(
+        User.id != doctor.id,
+        User.role.in_([UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.LAB_STAFF])
+    ).all()
     admins = User.query.filter_by(role=UserRole.ADMIN).all()
     other_doctors = User.query.filter(
         User.role == UserRole.DOCTOR,
@@ -366,7 +375,8 @@ def conversation(user_id):
                          messages=messages,
                          other_user=other_user,
                          admins=admins,
-                         other_doctors=other_doctors)
+                         other_doctors=other_doctors,
+                         staff_members=staff_members)
 
 
 @doctor_bp.route('/messages/send/<int:recipient_id>', methods=['POST'])
