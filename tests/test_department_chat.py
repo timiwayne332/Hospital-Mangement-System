@@ -60,6 +60,18 @@ class DepartmentChatSystemTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Lab result sent successfully.', response.data)
 
+    def test_unauthorized_admin_access_is_logged(self):
+        self.client.post('/auth/login', data={'username': 'doctor_user', 'password': 'secret123'})
+
+        response = self.client.get('/admin/users', follow_redirects=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'permission', response.data.lower())
+
+        with self.app.app_context():
+            from app.models import AuditLog
+            self.assertGreater(AuditLog.query.count(), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
