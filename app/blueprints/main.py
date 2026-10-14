@@ -124,6 +124,21 @@ def dashboard():
         ).all()
         
         return render_template('receptionist/dashboard.html', stats=stats)
+
+    elif current_user.role == UserRole.PHARMACIST:
+        stats['total_medicines'] = Medicine.query.count()
+        stats['low_stock_medicines'] = Medicine.query.filter(
+            Medicine.quantity <= Medicine.min_stock_level
+        ).count()
+        stats['available_medicines'] = Medicine.query.filter_by(is_available=True).count()
+        stats['medicines_pending_restock'] = Medicine.query.filter(
+            Medicine.quantity < Medicine.min_stock_level
+        ).count()
+        stats['recent_medicines'] = Medicine.query.order_by(Medicine.created_at.desc()).limit(5).all()
+        stats['low_stock_items'] = Medicine.query.filter(
+            Medicine.quantity <= Medicine.min_stock_level
+        ).order_by(Medicine.quantity.asc()).limit(5).all()
+        return render_template('pharmacy/dashboard.html', stats=stats)
     
     else:
         # Patient dashboard

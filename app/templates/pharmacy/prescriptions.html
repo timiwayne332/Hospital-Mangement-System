@@ -1,0 +1,51 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Prescription Dispensing{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-prescription-bottle-alt"></i> Prescription Dispensing</h2>
+    </div>
+    <a href="{{ url_for('pharmacy.dashboard') }}" class="btn btn-outline-secondary">Dashboard</a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Prescription</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Items</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prescription in prescriptions %}
+                    <tr>
+                        <td>#{{ prescription.id }}</td>
+                        <td>{{ prescription.patient.user.get_full_name() if prescription.patient and prescription.patient.user else 'Unknown patient' }}</td>
+                        <td>{{ prescription.doctor.user.get_full_name() if prescription.doctor and prescription.doctor.user else 'Unknown doctor' }}</td>
+                        <td>{{ prescription.prescription_items|length }}</td>
+                        <td><span class="badge bg-warning text-dark">{{ prescription.status }}</span></td>
+                        <td>
+                            <form action="{{ url_for('pharmacy.dispense_prescription', prescription_id=prescription.id) }}" method="POST">
+                                <button type="submit" class="btn btn-sm btn-success">Dispense</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">No active prescriptions waiting for dispensing.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

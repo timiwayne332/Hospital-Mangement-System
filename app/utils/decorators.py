@@ -52,6 +52,11 @@ def patient_required(f):
     return role_required(UserRole.PATIENT)(f)
 
 
+def pharmacist_required(f):
+    """Decorator to check if user is a pharmacist"""
+    return role_required(UserRole.PHARMACIST)(f)
+
+
 def staff_required(f):
-    """Decorator to check if user is staff (admin, doctor, or receptionist)"""
-    return role_required(UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST)(f)
+    """Decorator to check if user is staff (admin, doctor, receptionist, or pharmacist)"""
+    return role_required(UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.PHARMACIST)(f)

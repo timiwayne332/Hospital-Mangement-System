@@ -1,0 +1,78 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Pharmacy Receipt{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card mx-auto" style="max-width: 720px;">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0">Pharmacy Receipt</h4>
+                <small class="text-muted">Invoice {{ sale.invoice_number }}</small>
+            </div>
+            <button class="btn btn-outline-primary btn-sm" onclick="window.print()">Print Receipt</button>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Sale Date:</strong> {{ sale.sale_date.strftime('%d %b %Y %H:%M') if sale.sale_date else '—' }}</p>
+                    <p class="mb-1"><strong>Payment Method:</strong> {{ sale.payment_method|title }}</p>
+                    <p class="mb-1"><strong>Payment Status:</strong> {{ sale.payment_status|title }}</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-1"><strong>Served By:</strong> {{ sale.seller.get_full_name() if sale.seller else 'Pharmacist' }}</p>
+                    <p class="mb-1"><strong>Reference:</strong> {{ sale.payment.reference_number if sale.payment and sale.payment.reference_number else '—' }}</p>
+                </div>
+            </div>
+
+            <table class="table table-sm table-bordered">
+                <thead>
+                    <tr>
+                        <th>Medicine</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in sale.items %}
+                    <tr>
+                        <td>{{ item.medicine_name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ '%.2f'|format(item.unit_price) }}</td>
+                        <td>${{ '%.2f'|format(item.subtotal) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="row justify-content-end mt-4">
+                <div class="col-md-5">
+                    <table class="table table-borderless mb-0">
+                        <tr>
+                            <th>Subtotal</th>
+                            <td class="text-end">${{ '%.2f'|format(sale.subtotal) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Discount</th>
+                            <td class="text-end">${{ '%.2f'|format(sale.discount_amount or 0) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total</th>
+                            <td class="text-end"><strong>${{ '%.2f'|format(sale.total_amount) }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Amount Paid</th>
+                            <td class="text-end">${{ '%.2f'|format(sale.amount_paid) }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+            <a href="{{ url_for('pharmacy.sales') }}" class="btn btn-secondary">Back to POS</a>
+            <a href="{{ url_for('pharmacy.dashboard') }}" class="btn btn-primary">Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

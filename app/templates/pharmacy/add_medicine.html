@@ -1,0 +1,62 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Add Medicine{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-plus"></i> Add New Medicine</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="medicine_code" class="form-label">Medicine Code</label>
+                            <input type="text" class="form-control" id="medicine_code" name="medicine_code" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">Medicine Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="generic_name" class="form-label">Generic Name</label>
+                            <input type="text" class="form-control" id="generic_name" name="generic_name">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="manufacturer" class="form-label">Manufacturer</label>
+                            <input type="text" class="form-control" id="manufacturer" name="manufacturer">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="unit" class="form-label">Unit</label>
+                            <input type="text" class="form-control" id="unit" name="unit" value="tablet">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="quantity" class="form-label">Initial Quantity</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" min="0" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="min_stock_level" class="form-label">Minimum Stock</label>
+                            <input type="number" class="form-control" id="min_stock_level" name="min_stock_level" min="0" value="10">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="price_per_unit" class="form-label">Unit Price</label>
+                            <input type="number" step="0.01" class="form-control" id="price_per_unit" name="price_per_unit" min="0" value="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="expiry_date" class="form-label">Expiry Date</label>
+                            <input type="date" class="form-control" id="expiry_date" name="expiry_date">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('pharmacy.inventory') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Medicine</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

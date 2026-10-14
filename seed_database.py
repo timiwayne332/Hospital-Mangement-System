@@ -87,6 +87,20 @@ def seed_database():
         db.session.add(receptionist)
         db.session.commit()
 
+        # Create Pharmacist
+        print("Creating pharmacist...")
+        pharmacist = User(
+            username='pharmacist',
+            email='pharmacist@hospital.com',
+            first_name='Pharmacy',
+            last_name='Staff',
+            phone='4444444444',
+            role=UserRole.PHARMACIST
+        )
+        pharmacist.set_password('pharmacist123')
+        db.session.add(pharmacist)
+        db.session.commit()
+
         # Create Lab Staff
         print("Creating lab staff...")
         lab_staff_user = User(

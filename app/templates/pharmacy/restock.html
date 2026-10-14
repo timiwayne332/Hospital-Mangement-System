@@ -1,0 +1,47 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Pharmacy Restock{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-truck-loading"></i> Restock Medicine</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="medicine_id" class="form-label">Medicine</label>
+                            <select class="form-select" id="medicine_id" name="medicine_id" required>
+                                <option value="">Select medicine</option>
+                                {% for medicine in medicines %}
+                                <option value="{{ medicine.id }}">{{ medicine.name }} ({{ medicine.medicine_code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="quantity" class="form-label">Quantity to Add</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="unit_cost" class="form-label">Unit Cost</label>
+                            <input type="number" class="form-control" id="unit_cost" name="unit_cost" min="0" step="0.01" value="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="supplier" class="form-label">Supplier / Manufacturer</label>
+                            <input type="text" class="form-control" id="supplier" name="supplier" placeholder="Optional supplier name">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('pharmacy.inventory') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Restock</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

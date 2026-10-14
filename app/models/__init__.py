@@ -15,6 +15,7 @@ class UserRole(enum.Enum):
     ADMIN = 'admin'
     DOCTOR = 'doctor'
     RECEPTIONIST = 'receptionist'
+    PHARMACIST = 'pharmacist'
     LAB_STAFF = 'lab_staff'
     PATIENT = 'patient'
 
@@ -286,6 +287,8 @@ class Medicine(db.Model):
     
     # Relationships
     medicine_logs = db.relationship('MedicineLog', back_populates='medicine', cascade='all, delete-orphan')
+    pharmacy_sale_items = db.relationship('PharmacySaleItem', back_populates='medicine', cascade='all, delete-orphan')
+    purchase_items = db.relationship('PharmacyPurchaseItem', back_populates='medicine', cascade='all, delete-orphan')
     
     def __repr__(self):
         return f'<Medicine {self.name}>'
@@ -307,6 +310,122 @@ class MedicineLog(db.Model):
     
     def __repr__(self):
         return f'<MedicineLog {self.id}>'
+
+
+class Supplier(db.Model):
+    """Supplier used for medicine purchases."""
+    __tablename__ = 'suppliers'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False, unique=True)
+    contact_person = db.Column(db.String(120))
+    phone = db.Column(db.String(30))
+    email = db.Column(db.String(120))
+    address = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    purchases = db.relationship('PharmacyPurchase', back_populates='supplier', cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return f'<Supplier {self.name}>'
+
+
+class PharmacyPurchase(db.Model):
+    """Purchase ledger for restocking medicines from suppliers."""
+    __tablename__ = 'pharmacy_purchases'
+
+    id = db.Column(db.Integer, primary_key=True)
+    supplier_id = db.Column(db.Integer, db.ForeignKey('suppliers.id'), nullable=False)
+    invoice_number = db.Column(db.String(40), unique=True, nullable=False, index=True)
+    purchase_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    subtotal = db.Column(db.Float, default=0.0, nullable=False)
+    tax_amount = db.Column(db.Float, default=0.0)
+    total_amount = db.Column(db.Float, default=0.0, nullable=False)
+    amount_paid = db.Column(db.Float, default=0.0, nullable=False)
+    payment_status = db.Column(db.String(30), default='pending')
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    supplier = db.relationship('Supplier', back_populates='purchases')
+    items = db.relationship('PharmacyPurchaseItem', back_populates='purchase', cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return f'<PharmacyPurchase {self.invoice_number}>'
+
+
+class PharmacyPurchaseItem(db.Model):
+    """Medicine line item in a supplier purchase."""
+    __tablename__ = 'pharmacy_purchase_items'
+
+    id = db.Column(db.Integer, primary_key=True)
+    purchase_id = db.Column(db.Integer, db.ForeignKey('pharmacy_purchases.id'), nullable=False)
+    medicine_id = db.Column(db.Integer, db.ForeignKey('medicines.id'), nullable=False)
+    medicine_name = db.Column(db.String(120), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    unit_cost = db.Column(db.Float, nullable=False)
+    subtotal = db.Column(db.Float, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    purchase = db.relationship('PharmacyPurchase', back_populates='items')
+    medicine = db.relationship('Medicine', back_populates='purchase_items')
+
+
+class PharmacySale(db.Model):
+    """Real pharmacy sales transaction record."""
+    __tablename__ = 'pharmacy_sales'
+
+    id = db.Column(db.Integer, primary_key=True)
+    invoice_number = db.Column(db.String(30), unique=True, nullable=False, index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    sale_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    subtotal = db.Column(db.Float, default=0.0, nullable=False)
+    discount_amount = db.Column(db.Float, default=0.0)
+    total_amount = db.Column(db.Float, default=0.0, nullable=False)
+    amount_paid = db.Column(db.Float, default=0.0, nullable=False)
+    payment_method = db.Column(db.String(30), default='cash')
+    payment_status = db.Column(db.String(30), default='paid')
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    seller = db.relationship('User', foreign_keys=[user_id])
+    items = db.relationship('PharmacySaleItem', back_populates='sale', cascade='all, delete-orphan')
+    payment = db.relationship('PharmacyPayment', back_populates='sale', uselist=False, cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return f'<PharmacySale {self.invoice_number}>'
+
+
+class PharmacySaleItem(db.Model):
+    """Single medicine sold in a pharmacy sale."""
+    __tablename__ = 'pharmacy_sale_items'
+
+    id = db.Column(db.Integer, primary_key=True)
+    sale_id = db.Column(db.Integer, db.ForeignKey('pharmacy_sales.id'), nullable=False)
+    medicine_id = db.Column(db.Integer, db.ForeignKey('medicines.id'), nullable=False)
+    medicine_name = db.Column(db.String(120), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    unit_price = db.Column(db.Float, nullable=False)
+    subtotal = db.Column(db.Float, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    sale = db.relationship('PharmacySale', back_populates='items')
+    medicine = db.relationship('Medicine', back_populates='pharmacy_sale_items')
+
+
+class PharmacyPayment(db.Model):
+    """Payment record for a pharmacy sale."""
+    __tablename__ = 'pharmacy_payments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    sale_id = db.Column(db.Integer, db.ForeignKey('pharmacy_sales.id'), nullable=False)
+    payment_method = db.Column(db.String(30), nullable=False)
+    amount = db.Column(db.Float, default=0.0, nullable=False)
+    reference_number = db.Column(db.String(80))
+    status = db.Column(db.String(20), default='completed')
+    paid_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    sale = db.relationship('PharmacySale', back_populates='payment')
 
 
 class LabTest(db.Model):

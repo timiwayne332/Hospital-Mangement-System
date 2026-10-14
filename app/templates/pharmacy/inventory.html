@@ -1,0 +1,81 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Pharmacy Inventory{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-pills"></i> Pharmacy Inventory</h2>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('pharmacy.new_medicine') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Medicine</a>
+        <a href="{{ url_for('pharmacy.dashboard') }}" class="btn btn-outline-secondary">Dashboard</a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-8">
+                <label for="search" class="form-label">Search medicines</label>
+                <input type="text" class="form-control" id="search" name="q" value="{{ search }}" placeholder="Search by name, generic name or code">
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Generic</th>
+                        <th>Manufacturer</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Expiry</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medicine in medicines %}
+                    <tr>
+                        <td>{{ medicine.medicine_code }}</td>
+                        <td>{{ medicine.name }}</td>
+                        <td>{{ medicine.generic_name or '-' }}</td>
+                        <td>{{ medicine.manufacturer or '-' }}</td>
+                        <td>{{ medicine.quantity }}</td>
+                        <td>${{ '%.2f'|format(medicine.price_per_unit) }}</td>
+                        <td>{{ medicine.expiry_date.strftime('%Y-%m-%d') if medicine.expiry_date else 'N/A' }}</td>
+                        <td>
+                            {% if medicine.is_available %}
+                            <span class="badge bg-success">Available</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Unavailable</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('pharmacy.edit_medicine', medicine_id=medicine.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                            <form action="{{ url_for('pharmacy.delete_medicine', medicine_id=medicine.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this medicine?');">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">No medicines found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
