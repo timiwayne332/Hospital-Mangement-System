@@ -5,7 +5,7 @@ from functools import wraps
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
-from app.models import db, UserRole, LabResult, Patient, Message, User
+from app.models import db, UserRole, LabResult, Patient, Message, User, LabTest
 
 labstaff_bp = Blueprint('labstaff', __name__, url_prefix='/labstaff', template_folder='../templates')
 
@@ -35,6 +35,82 @@ def dashboard():
         pending_results=pending_results,
         recent_results=recent_results
     )
+
+
+@labstaff_bp.route('/lab-tests')
+@login_required
+@lab_staff_required
+def lab_tests_list():
+    """List all available lab tests managed by the lab department."""
+    tests = LabTest.query.order_by(LabTest.test_name.asc()).all()
+    return render_template('labstaff/lab_tests_list.html', tests=tests)
+
+
+@labstaff_bp.route('/lab-tests/<int:test_id>/delete', methods=['POST'])
+@login_required
+@lab_staff_required
+def delete_lab_test(test_id):
+    """Delete a lab test definition from the catalog."""
+    test = LabTest.query.get_or_404(test_id)
+
+    try:
+        db.session.delete(test)
+        db.session.commit()
+        flash(f'Lab test "{test.test_name}" deleted successfully.', 'success')
+    except Exception as exc:
+        db.session.rollback()
+        flash(f'Error deleting lab test: {str(exc)}', 'danger')
+
+    return redirect(url_for('labstaff.lab_tests_list'))
+
+
+@labstaff_bp.route('/lab-tests/create', methods=['GET', 'POST'])
+@login_required
+@lab_staff_required
+def create_lab_test():
+    """Create a new lab test definition."""
+    if request.method == 'POST':
+        test_code = (request.form.get('test_code') or '').strip()
+        test_name = (request.form.get('test_name') or '').strip()
+        description = (request.form.get('description') or '').strip()
+        normal_range = (request.form.get('normal_range') or '').strip()
+        unit = (request.form.get('unit') or '').strip()
+        turnaround_time = (request.form.get('turnaround_time') or '').strip()
+
+        try:
+            price = float(request.form.get('price', 0) or 0)
+        except ValueError:
+            flash('Price must be a valid number.', 'danger')
+            return redirect(url_for('labstaff.create_lab_test'))
+
+        if not test_code or not test_name:
+            flash('Test code and name are required.', 'danger')
+            return redirect(url_for('labstaff.create_lab_test'))
+
+        if LabTest.query.filter_by(test_code=test_code).first():
+            flash('A lab test with that code already exists.', 'danger')
+            return redirect(url_for('labstaff.create_lab_test'))
+
+        try:
+            test = LabTest(
+                test_code=test_code,
+                test_name=test_name,
+                description=description or None,
+                normal_range=normal_range or None,
+                unit=unit or None,
+                price=price,
+                turnaround_time=turnaround_time or None,
+                is_active=True,
+            )
+            db.session.add(test)
+            db.session.commit()
+            flash('Lab test created successfully!', 'success')
+            return redirect(url_for('labstaff.lab_tests_list'))
+        except Exception as exc:
+            db.session.rollback()
+            flash(f'Error creating lab test: {str(exc)}', 'danger')
+
+    return render_template('labstaff/create_lab_test.html')
 
 
 @labstaff_bp.route('/results')

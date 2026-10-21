@@ -394,6 +394,11 @@
                                         <i class="fas fa-flask"></i> Lab Results
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint in ['labstaff.lab_tests_list', 'labstaff.create_lab_test'] %}active{% endif %}" href="{{ url_for('labstaff.lab_tests_list') }}">
+                                        <i class="fas fa-vials"></i> Lab Tests
+                                    </a>
+                                </li>
                             {% else %}
                                 <li class="nav-item">
                                     <a class="nav-link {% if request.endpoint == 'patient.dashboard' %}active{% endif %}" href="{{ url_for('patient.dashboard') }}">

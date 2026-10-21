@@ -19,6 +19,12 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated or current_user.role != UserRole.ADMIN:
+            user_info = current_user.username if current_user.is_authenticated else 'unauthenticated user'
+            log_audit(
+                'Denied',
+                'Access',
+                details=f'User {user_info} attempted to access admin-only route: {request.path}',
+            )
             flash('You do not have permission to access this page.', 'danger')
             return redirect(url_for('main.dashboard'))
         return f(*args, **kwargs)
